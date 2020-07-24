@@ -1,0 +1,311 @@
+<template>
+  <div class="item-warp">
+    <div class="header-title-content" v-show="!('1'.includes($route.query.type))">{{titleValue()}}</div>
+    <a class="time-out" v-show="testArray.length>0">时间：{{useTime}}</a>
+    <no-date v-if="testArray.length===0"/>
+      <div v-else>
+<div class="subject-warp">
+    <div class="subject" v-for="(item,index) in testArray" :key="index+'fdd'" v-show="index===curIndex">
+      <div class="subject-title">
+      {{`${index+1}、${ item.content}`}}<span class="test-type">
+        <!-- （{{ '14'.includes(item.type)?'单选题': '3'.includes(item.type)?'判断题':'多项选题'}}） -->
+        （{{answerType(item.type)}}）
+        </span>
+      </div>
+      <div class="subject-resolve">
+<mt-checklist
+  v-model="answerArray[index]"
+  :options="item.opts"
+   @change="currentValue($event,item.id,item.type)">
+</mt-checklist>
+      </div>
+    <div class="subject-btn">
+      <mt-button type="primary" size='large' @click.stop="confirm(item,index)" :disabled="item.show" v-show="!('15'.includes($route.query.type))">确认作答</mt-button>
+      <div class="confirm clearfix" v-show="item.show">
+          <h1 :style="{color:item.reply?'#26a2ff':'#ef4f4f'}">回答{{item.reply?'正确':'错误'}}</h1><h1>您的答案：<span> {{item.self}}</span></h1><h1>参考答案：<span>{{item.answer}}</span></h1>
+        </div>
+            </div>
+        </div>
+          <div class="collect-box" v-show=" !('15'.includes($route.query.type))">
+<span :class="{collec:collectObj[curIndex]}" @click.stop="collection()" v-if="!(answerObj.type===4)"><svg-icon :icon-class="collectObj[curIndex]?'collect':'uncollect'" slot="icon" class="collect-icon"></svg-icon>
+          <span class="cellec-text"> {{collectObj[curIndex]?'取消收藏':'收藏此题'}}</span></span>
+          </div>
+      </div>
+    <mt-tabbar fixed class="tools">
+  <mt-tab-item @click.native.stop="preven()">
+    上一题
+        <svg-icon icon-class="number" slot="icon"></svg-icon>
+  </mt-tab-item>
+  <mt-tab-item :style="{color:answerArray[testArray.length-1]? '#26a2ff !important':''}" @click.native="submit()">
+    <svg-icon icon-class="submit" slot="icon"></svg-icon>
+交卷
+  </mt-tab-item>
+    <mt-tab-item @click.native.stop="next()">
+    下一题
+        <svg-icon icon-class="number" slot="icon"></svg-icon>
+  </mt-tab-item>
+</mt-tabbar>
+  </div>
+  </div>
+
+</template>
+<script>
+import {randomTest, testResult, collectTest} from '@/api'
+import {testFormat, timeOut, formatAnswer, examTitle, examType} from '@/utils/common'
+import {mapGetters} from 'vuex'
+export default {
+  name: 'sortItem',
+  data () {
+    return {
+      useTime: '',
+      page: 0,
+      // '考试时间结束，请提交试卷！'
+      answerObj: {
+        time: 0,
+        type: this.$route.query.type,
+        answer: {}
+      },
+      answerArray: [[]],
+      curIndex: 0,
+      collectObj: [],
+      testArray: [],
+      isCollect: {}
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'plantInfo'
+    ])
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.testArray.length > 0) {
+      this.$popBox.MessageBox.confirm('您还未提交考卷，是否确定退出？').then(res => {
+        next()
+      }).catch(error => {
+        console.log(error)
+        next(false)
+      })
+    } else {
+      next()
+    }
+  },
+  created () {
+    this.getTest()
+  },
+  beforeDestroy () {
+    clearInterval(this.st)
+  },
+  methods: {
+    preven () {
+      if (this.curIndex === 0) {
+        this.$popBox.Toast({message: '没有上一题!', duration: 1000})
+        return false
+      }
+      this.curIndex--
+    },
+    getTest () {
+      this.$route.query.page = ++this.page
+      randomTest(this.$route.query).then(res => {
+        if (res.code === 200) {
+          ('5'.includes(this.$route.query.type)) && (this.answerObj.selfAssesId = res.data.id) && (res.data = res.data.questions) && (this.$route.query.passScore = res.data.passScore)
+          '1'.includes(this.$route.query.type) && (this.answerObj.id = res.data.id) && (res.data = res.data.questions)
+          this.size = testFormat(res.data)
+          this.answerArray.push(...new Array(this.size).fill([]))
+          this.testArray.push(...res.data)
+          this.timeOut()
+        } else if (/^70[123]$/.test(res.code)) {
+          this.$popBox.MessageBox.alert(res.msg).then(action => {
+            this.$router.go(-1)
+          })
+        }
+      })
+    },
+    next () {
+      if (this.answerArray[this.curIndex].length === 0) {
+        this.$popBox.Toast({message: '请选择答案!', duration: 1000})
+        return false
+      }
+      if (this.curIndex + 1 === this.testArray.length) {
+        this.$popBox.Toast({message: '最后一道题！', duration: 1000})
+        return false
+      }
+      this.curIndex++
+      // 下一步是否组数，没有新建一个
+      !('15'.includes(this.$route.query.type)) && this.curIndex + 1 === this.testArray.length && this.getTest()
+    },
+    confirm (item, index) {
+      if (this.answerArray[this.curIndex].length === 0) {
+        this.$popBox.Toast({message: '请选择答案!', duration: 1000})
+        return false
+      }
+      item.self = formatAnswer(this.answerArray[index])
+      item.answer = formatAnswer(item.answer)
+      item.reply = item.self === item.answer
+      item.show = true
+      item.opts.forEach(i => this.$set(i, 'disabled', true)
+      )
+    },
+    collection () {
+      this.$set(this.collectObj, this.curIndex, !this.collectObj[this.curIndex])
+      this.isCollect.questionId = this.testArray[this.curIndex].id
+      this.isCollect.type = this.collectObj[this.curIndex] ? 1 : 2
+      collectTest(this.isCollect)
+    },
+    timeOut () {
+      let endTime = parseInt(new Date(this.plantInfo.endTime).getTime() / 1000)
+      // console.log(endTime) || parseInt(Date.now() / 1000) === (endTime - 600))
+      this.st = setInterval(() => {
+        this.answerObj.time++
+        this.useTime = timeOut(this.answerObj.time)
+        if ('5'.includes(this.$route.query.type)) {
+          this.answerObj.time === 2400 && this.$popBox.Toast({message: '距离考试结束还有10分钟', duration: 5000});
+          (this.answerObj.time === 3000 || parseInt(Date.now() / 1000) > endTime) && this.autoSubmit()
+        }
+      }, 1000)
+    },
+    // 1 3 4 ,2 5
+    currentValue ($event, id, double) {
+      let flag = '134'.includes(double)
+      if (flag && $event.length > 1) {
+        $event.shift()
+      }
+      this.answerObj.answer[id] = $event
+    },
+    submit () {
+      if ((Object.keys(this.answerObj.answer)).length === 0) {
+        this.$popBox.Toast('请选择答案')
+        return false
+      }
+      this.$popBox.MessageBox.confirm('确定提交试卷！').then(action => {
+        this.commonSubmit()
+      })
+    },
+    autoSubmit () {
+      clearInterval(this.st)
+      this.$popBox.MessageBox.alert('考试时间结束，请提交试卷！').then(action => {
+        this.commonSubmit()
+      })
+    },
+    commonSubmit () {
+      this.$popBox.Indicator.open()
+      clearInterval(this.st)
+      testResult(this.answerObj).then(res => {
+        if (res.code === 200) {
+          res.data.type = this.$route.query.type
+          res.data.passScore = this.$route.query.passScore
+          this.testArray = []
+          this.$popBox.Indicator.close()
+          this.$nextTick(() => {
+            this.$router.replace({name: 'History_Details', query: {items: JSON.stringify(res.data)}})
+          })
+        }
+      })
+    },
+    answerType (type) {
+      return examType(type)
+    },
+    titleValue () {
+      return examTitle(this.$route.query.type)
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.item-warp{
+  height: 100%;
+  padding-bottom: 55px;
+  .tools{
+    .is-selected{
+      background: #fff;
+      color: #000;
+    }
+  }
+  .time-color{
+    color: #f15454;
+    font-weight: bold;
+  }
+}
+.subject-warp{
+  margin: 0px 10px 20px;
+  position: relative;
+  .subject-title{
+    color: #000;
+    font-size: 15px;
+    padding:8px;
+    line-height: 30px;
+    word-break: break-all;
+  }
+  .collect-box{
+    position: absolute;
+    bottom: -32px;
+    right: 16px;;
+  }
+}
+.subject-btn{
+  padding: 0px 15px;
+  position: relative;
+button{
+  border-radius: 20px;
+}
+
+}
+.collec{
+  color: #fa8715 !important;
+}
+/deep/.subject-resolve{
+  .mint-checklist{
+    .mint-cell{
+          background-image: none;
+      .mint-cell-wrapper{
+  background-image: none;
+      }
+    }
+  }
+}
+.test-type{
+  color: #26a2ff;
+}
+.time-out{
+  position: fixed;
+  top: 10px;
+  right: 5px;
+  color: #fff;
+  font-size: 13px;
+  z-index: 1001;
+}
+.confirm{
+  padding: 10px 0px 55px;
+  float: left;
+    span{
+font-weight: bold;
+display: inline-block;
+    }
+      h1{
+        margin: 14px 0px;
+        color: gray;
+        font-size: 14px;
+        &:first-child{
+          font-size: 16px;
+          margin-top: 0px;
+        }
+      }
+}
+.collect-icon{
+  width: 18px !important;
+  height: 18px !important;;
+}
+    .cellec-text{
+      font-size: 14px;
+      vertical-align: top;
+    }
+.exam-content{
+  font-size: 17px;
+margin: 10px 0px;
+}
+.fffdd{
+  height: 20px;
+  color: #f15454;
+  position: fixed;
+  bottom: 0px;
+}
+</style>

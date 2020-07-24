@@ -1,0 +1,123 @@
+<template>
+<div>
+  <div class="home-swiper">
+    <mt-swipe :auto="4000">
+  <mt-swipe-item v-for="(item,index) in advList" :key="index">
+    <img :src="item.advImg" :title="item.advTitle" @click="$router.push({path:'/details',query:{advUrl:item.advUrl}})">
+  </mt-swipe-item>
+</mt-swipe>
+  </div>
+  <div class="tools-panel">
+    <div class="tools-container">
+      <div class="tools-item" @click.stop="$router.push({path:'/sort'})">
+        <div class="tools-1"><svg-icon icon-class='test'/></div>
+        <i>综合练习</i>
+      </div>
+      <div class="tools-item" @click.stop="$router.push({name:'Sort_Item', query:{type:1}})">
+        <div class="tools-5"><svg-icon icon-class='test'/></div>
+        <i>难题练习</i>
+      </div>
+      <div class="tools-item" @click.stop="$router.push({path:'Sort_Item',query:{type:2}})">
+        <div class="tools-6"><svg-icon icon-class='test'/></div>
+        <i>错题练习</i>
+      </div>
+      <div class="tools-item" @click.stop="$router.push({name:'Sort_Item'})">
+      <div class="tools-2"><svg-icon icon-class='alarm'/></div>
+      <i>模拟测试</i>
+      </div>
+      <div class="tools-item " @click.stop="$router.push({name:'Sort_history'})">
+        <div class="tools-3"><svg-icon icon-class='record1'/></div>
+         <i>测试记录</i>
+      </div>
+      <div class="tools-item ">
+        <div class="tools-4"><svg-icon icon-class='alarm'/></div>
+         <i>练习记录</i>
+      </div>
+    </div>
+    <!-- <div class="tools-item"></div> -->
+  </div>
+  </div>
+</template>
+<script>
+import {homeAdvertiseList} from '@/api'
+export default {
+  name: 'Ware',
+  data () {
+    return {
+      advList: [],
+      advBO: {
+        platShow: 0
+      }
+    }
+  },
+  mounted () {
+    this.getBannerList()
+  },
+  methods: {
+    // 广告列表
+    getBannerList () {
+      homeAdvertiseList(this.advBO).then(res => {
+        if (res.data.advList.length > 0) {
+          this.advList.push(...res.data.advList)
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+  .home-swiper{
+    height: 190px;
+    margin-top: 40px;
+    img{
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .tools-panel{
+    height: 200px;
+    border-bottom: 10px solid ghostwhite;
+    border-top: 10px solid ghostwhite;
+  }
+  .tools-container{
+    // display: flex;
+
+    .tools-item{
+      // flex: 1;
+      width: 24%;
+      display: inline-block;
+      text-align: center;
+      margin: 18px 0px;
+        div{
+          box-sizing: border-box;
+          height: 60px;
+          width: 60px;
+          padding: 12px;
+          border-radius: 50%;
+          margin: 0 auto 10px;
+        }
+        i{
+          font-style: normal;
+          font-style: 14px;
+        }
+        .tools-1{
+          background-image:linear-gradient(-45deg, #1577b9, #abcde4);
+        }
+        .tools-2{
+          background-image:linear-gradient(-45deg, #ef3b4d, #f5c9da);
+        }
+        .tools-3{
+          background-image:linear-gradient(-45deg,#19b915, #e5f8e8);
+        }
+        .tools-4{
+          background-image:linear-gradient(-45deg, #c4901e, #f5ecc1);
+        }
+        .tools-5{
+          background-image:linear-gradient(-45deg, #15b98b, #abcde4);
+        }
+        .tools-6{
+          background-image:linear-gradient(-45deg, #bcd917, #fbf8ac);
+        }
+    }
+  }
+</style>

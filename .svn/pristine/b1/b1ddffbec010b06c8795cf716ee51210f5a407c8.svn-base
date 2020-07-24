@@ -1,0 +1,39 @@
+<template>
+  <div>
+<mt-cell
+  title="手机号"
+  :value="userInfo.mobile">
+</mt-cell>
+<mt-cell
+  title="性别"
+  to="/edite-page"
+  is-link
+  value="男">
+</mt-cell>
+<mt-cell
+  title="密码"
+  to="//edite-page"
+  is-link
+  value="修改密码">
+</mt-cell>
+  </div>
+</template>
+<script>
+import {mapGetters} from 'vuex'
+export default {
+  name: 'PersonInfo',
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
+  data () {
+    return {}
+  },
+
+  methods: {}
+}
+</script>
+<style lang="scss" scoped>
+
+</style>

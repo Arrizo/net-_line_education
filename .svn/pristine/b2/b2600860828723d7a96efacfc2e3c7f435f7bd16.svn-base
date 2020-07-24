@@ -1,0 +1,6 @@
+
+module.exports={
+  dev:{
+  target:'http://192.168.4.216:5840/api'
+  }
+}

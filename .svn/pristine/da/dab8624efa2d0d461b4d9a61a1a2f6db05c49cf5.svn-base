@@ -1,0 +1,92 @@
+<template>
+  <div class="plan-container"  v-infinite-scroll='getPlan' infinite-scroll-distance="10" infinite-scroll-disabled='loading'>
+<div class="plan-item-container"  v-for="(item,index) in 10" :key="index">
+<div class="plan-item-header"><h1>{{item.name}}</h1><span><mt-badge :color="item.qualified?'#26a2ff':'gray'" size='small'>{{item.qualified?'已完成':'未完成'}}</mt-badge></span></div>
+<div class="plan-item-body">
+  <div class="body-icon">{{current(index)}}</div>
+  <div class="body-title"><h2>测试题总数:{{item.testNum}}</h2><h2>观看课总时数:{{item.courseIds.length}}</h2><h2>模拟考试总数:{{item.practiceNum}}</h2></div>
+ <div class="body-title">
+   <h2>已测试题数:{{item.detail.testedNum}}</h2><h2>已观看的课时:{{item.detail.learnedCourse.length}}</h2><h2>已模拟考试数:{{item.detail.practiceNum}}</h2>
+   </div>
+    <!-- <mt-button size="small" type="primary" @click="$router.push({name:'Plan_Details',params:{detail}})">计划详情</mt-button> -->
+</div>
+</div>
+<loading-more :loading='loading' :loading-more='allLoading'/>
+  </div>
+</template>
+<script>
+import {studyPlan} from '@/api'
+export default {
+  name: 'StudyPlan',
+  data () {
+    return {
+      planList: [],
+      loading: false,
+      allLoading: false
+    }
+  },
+  created () {
+    this.getPlan({userNo: '2020042313472123'})
+  },
+  methods: {
+    getPlan () {
+      studyPlan().then(res => {
+        if (res.code === 200) {
+          this.planList = res.data
+        }
+      })
+    },
+    plan_details () {
+
+    },
+    current (index) {
+      let indexs = index + 1
+      return indexs > 9 ? indexs : '0' + indexs
+    }
+  },
+  components: {
+    // StudyItem
+  }
+}
+</script>
+<style lang="scss" scoped>
+.plan-container{
+  margin:0px 10px;
+}
+.plan-item-container{
+margin-bottom: 10px;
+    box-shadow: 0px 0px 1px 2px #edc5a840;
+
+.plan-item-header{
+  height: 30px;
+  font-size: 16px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+ padding: 5px 35px;
+}
+.plan-item-body{
+display: flex;
+align-items: center;
+justify-content: space-around;
+padding: 5px 0px;
+   border: 1px solid #e4e4e6;
+.body-icon{
+display:inline-block;
+width: 30px;
+height: 30px;
+color: #fff;
+background: goldenrod;
+line-height: 30px;
+text-align: center;
+border-radius: 50%
+}
+}
+.body-title{
+  h2{
+    margin: 8px auto;
+    color: #949494;
+  }
+}
+}
+</style>

@@ -1,0 +1,235 @@
+<template>
+  <div class="item-warp">
+    <a class="time-out" v-show="testArray.length>0">时间：{{useTime}}</a>
+    <no-date v-if="testArray.length===0"/>
+      <div v-else>
+<div class="subject-warp">
+    <div class="subject" v-for="(item,index) in testArray" :key="index+'fdd'" v-show="index===curIndex">
+      <div class="subject-title">
+      {{`${index+1}、${ item.content}`}}<span class="test-type">
+        <!-- （{{ '14'.includes(item.type)?'单选题': '3'.includes(item.type)?'判断题':'多项选题'}}） -->
+        （{{answerType(item.type)}}）
+        </span>
+      </div>
+      <div class="subject-resolve">
+<mt-checklist
+  v-model="answerArray[index]"
+  :options="item.opts"
+   @change="currentValue($event,item.id,item.type)">
+</mt-checklist>
+      </div>
+        </div>
+      </div>
+    <mt-tabbar fixed class="tools">
+  <mt-tab-item @click.native.stop="preven()">
+    上一题
+        <svg-icon icon-class="number" slot="icon"></svg-icon>
+  </mt-tab-item>
+  <mt-tab-item :style="{color:answerArray[testArray.length-1]? '#26a2ff !important':''}" @click.native="submit()">
+    <svg-icon icon-class="submit" slot="icon"></svg-icon>
+交卷
+  </mt-tab-item>
+    <mt-tab-item @click.native.stop="next()">
+    下一题
+        <svg-icon icon-class="number" slot="icon"></svg-icon>
+  </mt-tab-item>
+</mt-tabbar>
+  </div>
+  </div>
+
+</template>
+<script>
+import {randomTest, testResult} from '@/api'
+import {testFormat, timeOut, examType} from '@/utils/common'
+import {autoExam} from '@/utils/examToast'
+import {mapGetters} from 'vuex'
+export default {
+  name: 'KeepExam',
+  data () {
+    return {
+      useTime: '',
+      page: 0,
+      // '考试时间结束，请提交试卷！'
+      answerObj: {
+        time: 0,
+        type: this.$route.query.type,
+        answer: {}
+      },
+      answerArray: [[]],
+      curIndex: 0,
+      testArray: []
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'plantInfo'
+    ])
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.testArray.length > 0) {
+      this.$popBox.MessageBox.confirm('您还未提交考卷，是否确定退出？').then(res => {
+        next()
+      }).catch(error => {
+        console.log(error)
+        next(false)
+      })
+    } else {
+      console.log('destroy')
+      this.$destroy()
+      next()
+    }
+  },
+  created () {
+    this.getTest()
+  },
+
+  methods: {
+    preven () {
+      if (this.curIndex === 0) {
+        this.$popBox.Toast({message: '没有上一题!', duration: 1000})
+        return false
+      }
+      this.curIndex--
+    },
+    getTest () {
+      this.$popBox.Indicator.open()
+      this.$route.query.page = ++this.page
+      randomTest(this.$route.query).then(res => {
+        if (res.code === 200) {
+          this.answerObj.selfAssesId = res.data.id
+          this.$route.query.passScore = res.data.passScore
+          res.data = res.data.questions
+          this.size = testFormat(res.data)
+          this.answerArray.push(...new Array(this.size).fill([]))
+          this.testArray.push(...res.data)
+          this.timeOut()
+        } else if (/^70[123]$/.test(res.code)) {
+          this.$popBox.MessageBox.alert(res.msg).then(action => {
+            this.$router.go(-1)
+          })
+        }
+        this.$popBox.Indicator.close()
+      }).catch(() => {
+        this.$popBox.Indicator.close()
+        this.$popBox.MessageBox.alert('暂无自评考试！').then(action => {
+          this.$router.go(-1)
+        })
+      })
+    },
+    next () {
+      autoExam(statu => {
+        console.log('statu,', statu)
+      })
+      if (this.answerArray[this.curIndex].length === 0) {
+        this.$popBox.Toast({message: '请选择答案!', duration: 1000})
+        return false
+      }
+      if (this.curIndex + 1 === this.testArray.length) {
+        this.$popBox.Toast({message: '最后一道题！', duration: 1000})
+        return false
+      }
+      this.curIndex++
+    },
+    timeOut () {
+      this.st = setInterval(() => {
+        this.answerObj.time++
+        this.useTime = timeOut(this.answerObj.time)
+        autoExam(this.answerObj.time, () => {
+          this.autoSubmit()
+        })
+      }, 1000)
+    },
+    // 1 3 4 ,2 5
+    currentValue ($event, id, double) {
+      let flag = '134'.includes(double)
+      if (flag && $event.length > 1) {
+        $event.shift()
+      }
+      this.answerObj.answer[id] = $event
+    },
+    submit () {
+      console.log(this.$route.query)
+      if ((Object.keys(this.answerObj.answer)).length === 0) {
+        this.$popBox.Toast('请选择答案')
+        return false
+      }
+      this.$popBox.MessageBox.confirm('确定提交试卷！').then(action => {
+        this.commonSubmit()
+      })
+    },
+    autoSubmit () {
+      clearInterval(this.st)
+      this.$popBox.MessageBox.alert('考试时间结束，请提交试卷！').then(action => {
+        this.commonSubmit()
+      })
+    },
+    commonSubmit () {
+      this.$popBox.Indicator.open('交卷中...')
+      clearInterval(this.st)
+      testResult(this.answerObj).then(res => {
+        if (res.code === 200) {
+          res.data.type = this.$route.query.type
+          res.data.passScore = this.$route.query.passScore
+          this.testArray = []
+          this.$nextTick(() => {
+            this.$popBox.Indicator.close()
+            this.$router.replace({name: 'History_Details', query: {items: JSON.stringify(res.data)}})
+          })
+        }
+      })
+      this.$popBox.Indicator.close()
+    },
+    answerType (type) {
+      return examType(type)
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.item-warp{
+  height: 100%;
+  padding-bottom: 55px;
+  .tools{
+    .is-selected{
+      background: #fff;
+      color: #000;
+    }
+  }
+  .time-color{
+    color: #f15454;
+    font-weight: bold;
+  }
+}
+.subject-warp{
+  margin: 0px 10px 20px;
+  position: relative;
+  .subject-title{
+    color: #000;
+    font-size: 15px;
+    padding:8px;
+    line-height: 30px;
+    word-break: break-all;
+  }
+}
+/deep/.subject-resolve{
+  .mint-checklist{
+    .mint-cell{
+          background-image: none;
+      .mint-cell-wrapper{
+  background-image: none;
+      }
+    }
+  }
+}
+.test-type{
+  color: #26a2ff;
+}
+.time-out{
+  position: fixed;
+  top: 10px;
+  right: 5px;
+  color: #fff;
+  font-size: 13px;
+  z-index: 1001;
+}
+</style>

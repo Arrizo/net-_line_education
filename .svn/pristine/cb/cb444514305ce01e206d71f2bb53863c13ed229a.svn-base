@@ -1,0 +1,35 @@
+<template>
+  <div>
+    <mt-header title="性别">
+  <a slot="left">
+    <mt-button @click="$router.go(-1)">取消</mt-button>
+  </a>
+  <a slot="right" @click="confirm">确定</a>
+</mt-header>
+    <mt-radio
+  v-model="sex"
+  align='right'
+  :options="['男', '女']">
+</mt-radio>
+  </div>
+</template>
+<script>
+export default {
+  name: 'Edite',
+  data () {
+    return {
+      sex: '男'
+    }
+  },
+  methods: {
+    confirm () {
+
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+/deep/.mint-radiolist .mint-radiolist-title{
+  display: none;
+}
+</style>

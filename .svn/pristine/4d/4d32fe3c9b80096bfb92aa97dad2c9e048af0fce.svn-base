@@ -1,0 +1,16 @@
+// 存储静态变量 大写和下横杠_符号
+
+const HOME_NAME = 'HOME_NAME'
+const LOGIN_INFO = 'LOGIN_INFO'
+const LOGOUT_INFO = 'LOGOUT_INFO'
+const USER_NO = 'USER_NO'
+const USER_TOKEN = 'USER_TOKEN'
+const TEST_TYPE = 'TEST_TYPE'
+export {
+  HOME_NAME,
+  LOGIN_INFO,
+  LOGOUT_INFO,
+  USER_NO,
+  USER_TOKEN,
+  TEST_TYPE
+}

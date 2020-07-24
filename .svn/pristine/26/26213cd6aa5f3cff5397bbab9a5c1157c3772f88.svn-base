@@ -1,0 +1,48 @@
+<template>
+  <div>
+<mt-cell
+  title="手机号"
+  :value="userInfo.mobile">
+</mt-cell>
+<mt-cell
+  title="性别"
+  @click.native="toDetails('1')"
+  is-link
+  :value="userInfo.sexd">
+</mt-cell>
+<!-- <mt-cell
+  title="密码"
+  @click.native="toDetails('2')"
+  is-link
+  value="修改密码">
+</mt-cell> -->
+  </div>
+</template>
+<script>
+import {getUserInfo} from '@/api'
+export default {
+  name: 'PersonInfo',
+  data () {
+    return {
+      userInfo: {}
+    }
+  },
+  created () {
+    getUserInfo().then(res => {
+      if (res.code === 200) {
+        this.userInfo = res.data
+        this.userInfo.sexd = this.userInfo.sex === 1 ? '男' : this.userInfo.sex === 2 ? '女' : '保密'
+      }
+    })
+  },
+  methods: {
+    toDetails (type) {
+      this.userInfo.type = type
+      this.$router.push({path: '/edite-page', query: this.userInfo})
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+
+</style>

@@ -1,0 +1,207 @@
+<template>
+<div class="exam-warp">
+  <!-- <div class="exam">
+    <div>
+    <div class="loading" v-show="loading">
+    <span v-for="item in 5" :key="item"></span><div class="title">预备中...</div>
+    </div>
+    </div>
+     <div class="start-btn"><div class="start" @click="start">{{loadingText}}</div></div>
+    </div> -->
+    <div class="exam-field">
+      <div>
+<mt-field label="考生姓名:" v-model="username"></mt-field>
+<mt-field label="身份证号:" v-model="username"></mt-field>
+<mt-field label="单   位:" v-model="username"></mt-field>
+<mt-field label="信封编号:" v-model="username"></mt-field>
+  </div>
+  <div>
+<mt-field label="货币总张数" placeholder="请输入用户名" type='number' v-model="moneyObj.total"></mt-field>
+<mt-field label="假币张数" placeholder="请输入用户名" type='number' v-model="moneyObj.counter" @input="getCounter($event)"></mt-field>
+<!-- <mt-field label="请输入所有假币冠字号码:" class="all-money"></mt-field>
+<mt-field :label="item+'、'" type='number' v-model="moneyObj.counterMoy[index]" class="all-num" v-for="(item,index) in moneyObj.counter" :key="index"></mt-field> -->
+  </div>
+  <div v-for="(item,index) in  moneyObj.counter" :key="index">
+      <h1 class="money-title" @click="toggles(index)" >伪造币假币特征（其中1张）<i class="close" :class="{'open':curIndex===index}"></i></h1>
+      <h1  class="show" :class="{'show-item':curIndex===index}">
+      <mt-field label="假币冠字号码:" placeholder="请输入号码" type='number' v-model="moneyObj.counter"></mt-field>
+      <mt-field label="假币特征：" class="all-money"></mt-field>
+      <mt-checklist
+  v-model="value"
+  :options="['选项A', '选项B', '选项C']">
+</mt-checklist>
+</h1>
+  </div>
+    </div>
+    </div>
+</template>
+<script>
+import SockJs from 'sockjs-client'
+import Stomp from 'stompjs'
+
+export default {
+  name: 'Examination',
+  data () {
+    return {
+      username: '',
+      curIndex: '',
+      value: [],
+      loading: false,
+      loadingText: '开始',
+      liasdf: [],
+      moneyObj: {
+        counterMoy: []
+      }
+    }
+  },
+  created () {
+    this.initWebsocket()
+  },
+  beforeDestroy () {
+    this.stompClien && this.stompClien.disconnect()
+  },
+  methods: {
+    toggles (index) {
+      this.curIndex = index === this.curIndex ? '' : index
+    },
+    initWebsocket () {
+      let seft = this
+      if (this.stompClien) return
+      let sock = new SockJs('http://192.168.4.28:5840/api')
+      this.stompClien = Stomp.over(sock)
+      this.stompClien.connect({}, (data) => {
+      // 连接成功是返回的数据
+        console.log(data)
+        this.stompClien.subscribe('api/alist', (res) => {
+          // 订阅某个topic
+          console.log(res)
+        })
+      }, (error) => {
+        setInterval(() => {
+          seft.initWebsocket()
+        }, 2000)
+        console.log('connect falt...', error)
+      })
+    },
+    getCounter ($event) {
+      (!$event) && ($event = 0)
+      this.moneyObj.counter = parseInt($event)
+    },
+    start () {
+      let seft = this
+      this.loading = !this.loading
+      this.loadingText = this.loading ? '取消开始' : '开始'
+      this.stompClien.send('api/send', {}, JSON.stringify({ready: seft.loading}))
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.exam-warp{
+  height: 100%;
+  margin-top: 40px;
+  .exam-field{
+    div{
+      border-bottom: 10px solid #ebebeb;
+    }
+  }
+}
+.exam{
+        display:flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        .start-btn{
+            margin-top: 200px
+        }
+}
+.loading{
+            width: 80px;
+            height: 40px;
+            margin: 0 auto;
+            text-align:center;
+        }
+        .loading span{
+            display: inline-block;
+            width: 8px;
+            height: 100%;
+            margin: 0px 2px;
+            border-radius: 4px;
+            background: lightgreen;
+            animation: load 1s ease infinite;
+        }
+        @keyframes load{
+            0%,100%{
+                height: 40px;
+                background: lightgreen;
+            }
+            50%{
+                height: 70px;
+                margin: -15px 2px;
+                background: lightblue;
+            }
+        }
+        .loading span:nth-child(2){
+            animation-delay:0.2s;
+        }
+        .loading span:nth-child(3){
+            animation-delay:0.4s;
+        }
+        .loading span:nth-child(4){
+            animation-delay:0.6s;
+        }
+        .loading span:nth-child(5){
+            animation-delay:0.8s;
+        }
+        .title{
+            margin:30px auto 30px;
+            color: lightgreen
+        }
+        .start{
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            text-align: center;
+            display: table-cell;
+            font-size: 17px;
+            color: #fff;
+            vertical-align: middle;
+            background-image: linear-gradient(-30deg,lightgreen,lightblue)
+        }
+      /deep/.all-money .mint-cell-wrapper .mint-cell-title{
+        width: 100%
+      }
+      /deep/.all-num .mint-cell-wrapper .mint-cell-title{
+        width: auto;
+      }
+      .money-title{
+            font-size: 18px;
+    text-align: center;
+    margin: 8px 0px;
+      }
+      .show{
+        display: inline-block;
+        transition: all .3s;
+        max-height: 0px;
+        overflow:hidden;
+            width: 100%;
+      }
+      .show-item{
+        max-height: 200px
+      }
+      .close{
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-right: 1px solid gray;
+        border-bottom: 1px solid gray;
+        transform: rotate(-45deg);
+        margin-left:90px;
+        transition: all .3s;
+      }
+      .open{
+        transform: rotate(45deg)
+      }
+</style>

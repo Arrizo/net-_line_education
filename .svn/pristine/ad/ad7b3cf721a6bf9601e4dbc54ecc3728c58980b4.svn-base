@@ -1,0 +1,53 @@
+<template>
+  <div class="footer">
+<mt-tabbar v-model="selected" class="home-table">
+  <mt-tab-item id="home" >
+    <svg-icon :icon-class="selected==='home'?'home1':'home'" slot="icon"></svg-icon>
+   <router-link :to="{path:'/home'}" class='href-item'>首页</router-link>
+  </mt-tab-item>
+  <mt-tab-item id="course" >
+    <svg-icon :icon-class="selected==='course'?'course':'course1'" slot="icon"></svg-icon>
+    <router-link :to="{path:'/ware'}" class='href-item'>题库</router-link>
+  </mt-tab-item>
+  <mt-tab-item id="person" >
+    <svg-icon :icon-class="selected==='person'?'person1':'person'" slot="icon"></svg-icon>
+   <router-link :to="{path:'/person'}" class='href-item'>我的</router-link>
+  </mt-tab-item>
+</mt-tabbar>
+
+  </div>
+</template>
+<script>
+export default {
+  name: 'Footer',
+  props: {
+  },
+  data () {
+    return {
+      isSelect: true,
+      selected: 'home'
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.footer{
+  width: 100%;
+  position:fixed;
+  left: 0px;
+  bottom: 0px;
+  height: 50px;
+  background: #f6f6f6;
+  border-top: 1px solid #cacaca;
+
+}
+/deep/.home-table .is-selected {
+  background: #f6f6f6;
+  .router-link-active{
+    color: dodgerblue;
+  }
+}
+.href-item{
+  padding: 25% 30%;
+}
+</style>

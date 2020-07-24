@@ -1,0 +1,51 @@
+<template>
+  <div class="hist-box" v-infinite-scroll='loadMore' infinite-scroll-distance="10"  infinite-scroll-disabled='loding'>
+    <mt-cell title="标题文字" :label="`测试时间：${item.createTime}`" v-for="(item,index) in list" :key="index" is-link @click.native="$router.push({name:'History_Details',query:{id:item.id}})">
+  <span>分数：{{item.score}}</span>
+</mt-cell>
+<loading-more :loading='loding' :loading-more='allLoading'/>
+  </div>
+</template>
+<script>
+import {historyList} from '@/api'
+export default {
+  name: 'SortHistory',
+  data () {
+    return {
+      onDate: false,
+      allLoading: false,
+      loding: false,
+      historyObj: {
+        current: 0,
+        size: 20,
+        type: this.$route.query.type
+      },
+      list: []
+    }
+  },
+  created () {
+    this.loadMore()
+    // this.getHistory()
+  },
+  methods: {
+    getHistory () {
+      this.loding = true
+      this.historyObj.current++
+      historyList(this.historyObj).then(res => {
+        if (res.code === 200) {
+          this.list.push(...res.data.records)
+          this.allLoading = res.data.total === this.list.length
+        }
+        this.loding = this.allLoading
+      }).catch(() => {
+        this.onDate = true
+      })
+    },
+    loadMore () {
+      this.getHistory()
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+</style>

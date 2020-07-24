@@ -1,0 +1,35 @@
+const Person = resolve => require(['@/containers/Person'], resolve)
+const Menber = resolve => require(['@/containers/Person/VipMember'], resolve)
+const StudyRecord = resolve => require(['@/containers/Person/StudyRecord'], resolve)
+const routes = [{
+  path: '/person',
+  name: 'Person',
+  component: Person,
+  meta: {
+    hasHeader: false,
+    hasFooter: true
+  }
+},
+{
+  path: '/menber',
+  name: 'Menber',
+  component: Menber,
+  meta: {
+    login: true,
+    hasFooter: true,
+    title: '会员中心',
+    hasBack: true
+  }
+},
+{
+  path: '/study',
+  name: 'study_record',
+  component: StudyRecord,
+  meta: {
+    login: true,
+    hasBack: true,
+    title: '学习记录'
+  }
+}]
+
+export default routes

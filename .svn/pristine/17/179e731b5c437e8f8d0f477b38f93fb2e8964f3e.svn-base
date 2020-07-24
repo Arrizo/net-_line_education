@@ -1,0 +1,61 @@
+export const oscript = () => {
+  let oscript = document.createElement('script')
+  oscript.type = 'text/javascript'
+  oscript.src = 'https://player.polyv.net/script/polyvplayer.min.js'
+  document.body.appendChild(oscript)
+}
+export const randomNo = () => {
+  let random = ''
+  for (let i = 0; i < 4; i++) {
+    random += Math.floor(Math.random() * 10)
+  }
+  random = new Date().getTime() + random
+  return random
+}
+// 获取大写字母
+export const getlatter = (index) => String.fromCharCode(65 + index)
+// 题目的选项的撰文
+
+export const formatAnswer = (list) => {
+  let answer = ''
+  if (list.length > 0) {
+    (list.sort()).forEach(item => {
+      answer += getlatter(item - 1) + '、'
+    })
+  }
+  return answer.replace(/、$/, '')
+}
+
+export const testFormat = (data) => {
+  data.forEach(item => {
+    (item.opts.sort((a, b) => a.value - b.value)).forEach((item, index) => {
+      item.label = getlatter(index) + '、' + item.content
+    })
+  })
+  return data.length
+}
+export const pickerDate = (picker) => {
+  let name = ''; let id = ''
+  picker.forEach(item => {
+    if (item && item.name !== ' ') {
+      name += item.name + '-'
+      id = item.id
+    }
+  })
+  name = name.substring(0, name.length - 1)
+  return {name, id}
+}
+export const timeOut = time => {
+  let [h, m, s] = [Math.floor(time / 3600 % 24), Math.floor(time / 60 % 60), Math.floor(time % 60)]
+  h = h < 10 ? '0' + h : h
+  m = m < 10 ? '0' + m : m
+  s = s < 10 ? '0' + s : s
+  return `${h}:${m}:${s}`
+}
+export const payRandom = () => {
+  let random = ''
+  for (let i = 0; i < 6; i++) {
+    random = String.fromCharCode(65 + (Math.floor(Math.random() * 10)))
+  }
+  return new Date().getTime() + random + new Date().getTime()
+}

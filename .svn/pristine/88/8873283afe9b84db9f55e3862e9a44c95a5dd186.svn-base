@@ -1,0 +1,62 @@
+<template>
+  <div class="study" >
+   <mt-navbar v-model="selected">
+  <mt-tab-item id="tab1">进行中</mt-tab-item>
+  <mt-tab-item id="tab2">已完成</mt-tab-item>
+</mt-navbar>
+<div class="study-container" >
+<mt-tab-container v-model="selected" :swipeable='true'>
+  <mt-tab-container-item id="tab1" >
+    <study-item v-for="(item,index) in studyObj" :key="index" v-if="item.periodNu!==item.playOverNu" :logItem="item"></study-item>
+  </mt-tab-container-item>
+    <mt-tab-container-item  id="tab2" >
+   <study-item v-for="(item,index) in studyObj" :key="index" v-if="item.periodNu===item.playOverNu" :logItem="item"></study-item>
+  </mt-tab-container-item>
+</mt-tab-container>
+</div>
+  </div>
+</template>
+<script>
+import StudyItem from './StudyItem'
+import {studylog} from '@/api'
+export default {
+  name: 'Study',
+  components: {
+    StudyItem
+  },
+  data () {
+    return {
+      selected: 'tab1',
+      loading: false,
+      studyObj: []
+    }
+  },
+  created () {
+    this.getStudyLog()
+  },
+  methods: {
+    getStudyLog () {
+      studylog({}).then(res => {
+        if (res.code === 200 && res.data.list.length > 0) {
+          this.studyObj = res.data.list
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+/deep/.study{
+.mint-navbar{
+  .mint-tab-item {
+      .mint-tab-item-label{
+        font-size:18px;
+      }
+      &.is-selected{
+         border-bottom: 5px solid #26a2ff;/*no*/
+      }
+  }
+}
+}
+
+</style>

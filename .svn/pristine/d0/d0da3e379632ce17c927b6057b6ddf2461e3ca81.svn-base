@@ -1,0 +1,53 @@
+<template>
+  <div class="study" >
+   <mt-navbar v-model="selected">
+  <mt-tab-item id="tab1">进行中</mt-tab-item>
+  <mt-tab-item id="tab2">已完成</mt-tab-item>
+</mt-navbar>
+<div class="study-container" >
+<mt-tab-container v-model="selected" :swipeable='true'>
+  <mt-tab-container-item  v-for="item in 2" :key="item"  :id="'tab'+item" >
+    <study-item :type='item'></study-item>
+  </mt-tab-container-item>
+</mt-tab-container>
+</div>
+  </div>
+</template>
+<script>
+import StudyItem from './StudyItem'
+export default {
+  name: 'Study',
+  components: {
+    StudyItem
+  },
+  data () {
+    return {
+      selected: 'tab1',
+      loading: false
+    }
+  },
+  methods: {
+    loadMore () {
+      console.log(22323)
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+/deep/.study{
+.mint-navbar{
+  .mint-tab-item {
+      .mint-tab-item-label{
+        font-size:18px;
+      }
+      &.is-selected{
+         border-bottom: 5px solid #26a2ff;/*no*/
+      }
+  }
+}
+}
+.study-container{
+  border: 8px solid #f4f4f4;
+}
+
+</style>

@@ -1,0 +1,55 @@
+import {HOME_NAME, TEST_TIME, IS_FINISH} from '@/store/mutationTypes'
+import {randomTest} from '@/api'
+const state = {
+  isLogin: '111',
+  type: 0,
+  plantInfo: {},
+  time: 200
+}
+const actions = {
+  doLogin ({commit, state}, params) {
+    commit(HOME_NAME, params)
+  },
+  timeToTest ({commit, state}) {
+    // let st = setInterval(() => {
+    //   console.log(state.plantInfo, '=-==')
+    //   let startTime = new Date(state.plantInfo.startTime).getTime() / 1000
+    //   let nowTime = Date.now() / 1000
+    //   commit(TEST_TIME, parseInt(startTime - nowTime))
+    //   if (state.time < 0) {
+    //     clearInterval(st)
+    //   }
+    // }, 1000)
+  },
+  finishPlan ({commit, state}) {
+    let obj = {startTime: '2020-06-11 16:00:00', endTime: '2020-06-11 16:01:00'}
+    randomTest({type: 5}).then(res => {
+      if (res.code === 200) {
+        obj.endTime = res.data.endTime
+        obj.startTime = res.data.startTime
+        obj.stipulatedTime = res.data.stipulatedTime
+      } else {
+        obj.msg = res.msg
+      }
+    })
+    console.log(obj)
+    commit(IS_FINISH, obj)
+    actions.timeToTest({commit, state})
+  }
+}
+const mutations = {
+  [HOME_NAME] (state, params) {
+    state.isLogin = params
+  },
+  [TEST_TIME] (state, time) {
+    state.time = time
+  },
+  [IS_FINISH] (state, data) {
+    state.plantInfo = data
+  }
+}
+export default{
+  state,
+  actions,
+  mutations
+}

@@ -1,0 +1,53 @@
+import {HOME_NAME, TEST_TYPE, IS_FINISH} from '@/store/mutationTypes'
+import {studyPlan, randomTest} from '@/api'
+const state = {
+  isLogin: '111',
+  type: 0,
+  plantInfo: {}
+}
+const actions = {
+  doLogin ({commit, state}, params) {
+    commit(HOME_NAME, params)
+  },
+  changeType ({commit, state}, type) {
+    return new Promise((resolve, reject) => {
+      commit(TEST_TYPE, type)
+      resolve()
+    })
+  },
+  finishPlan ({commit, state}) {
+    let obj = {}
+    studyPlan().then(res => {
+      if (res.code === 200) {
+        let plan = res.data
+        plan.forEach(item => {
+          item.qualified && (obj.isFinish = item.qualified)
+        })
+      }
+    })
+    randomTest({type: 5}).then(res => {
+      if (res.code === 200) {
+        obj.endTime = res.data.endTime
+        obj.startTime = res.data.startTime
+        obj.stipulatedTime = res.data.stipulatedTime
+      }
+    })
+    commit(IS_FINISH, obj)
+  }
+}
+const mutations = {
+  [HOME_NAME] (state, params) {
+    state.isLogin = params
+  },
+  [TEST_TYPE] (state, type) {
+    state.type = type
+  },
+  [IS_FINISH] (state, data) {
+    state.plantInfo = data
+  }
+}
+export default{
+  state,
+  actions,
+  mutations
+}

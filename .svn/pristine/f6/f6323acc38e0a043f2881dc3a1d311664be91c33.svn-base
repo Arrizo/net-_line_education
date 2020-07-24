@@ -1,0 +1,92 @@
+<template>
+  <div class="plan-container">
+<div class="plan-item-container"  v-for="(item,index) in 6" :key="index">
+<div class="plan-item-header"><h1>2312</h1><span><mt-badge :color="'#26a2ff'" size='small'>已完成</mt-badge></span></div>
+<div class="plan-item-body">
+  <div class="body-icon ">01</div>
+  <div class="body-title"><h2>测试题总数:12</h2><h2>观看课总时数:23</h2><h2>模拟考试总数:43</h2></div>
+ <div class="body-title"><h2>已测试题数:12</h2><h2>已观看的课时:23</h2><h2>已模拟考试数:43</h2></div>
+    <!-- <mt-button size="small" type="primary" @click="$router.push({name:'Plan_Details',params:{detail}})">计划详情</mt-button> -->
+
+</div>
+</div>
+  </div>
+</template>
+<script>
+import {studyPlan} from '@/api'
+export default {
+  name: 'StudyPlan',
+  data () {
+    return {
+      planList: [],
+      detail: {
+        'learnedCourse': null,
+        'unlearnedCourse': [
+          1254284886651441200
+        ],
+        'testedNum': 0,
+        'practiceNum': 0,
+        'practiceLogs': []
+      }
+    }
+  },
+  created () {
+    this.getPlan({userNo: '2020042313472123'})
+  },
+  methods: {
+    getPlan () {
+      studyPlan().then(res => {
+        if (res.code === 200) {
+          this.planList = res.data
+        }
+      })
+    },
+    plan_details () {
+
+    }
+  },
+  components: {
+    // StudyItem
+  }
+}
+</script>
+<style lang="scss" scoped>
+.plan-container{
+  margin:0px 10px;
+}
+.plan-item-container{
+margin-bottom: 10px;
+    box-shadow: 0px 0px 1px 2px #edc5a840;
+
+.plan-item-header{
+  height: 30px;
+  font-size: 16px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+ padding: 5px 35px;
+}
+.plan-item-body{
+display: flex;
+align-items: center;
+justify-content: space-around;
+padding: 5px 0px;
+   border: 1px solid #e4e4e6;
+.body-icon{
+display:inline-block;
+width: 30px;
+height: 30px;
+background: goldenrod;
+line-height: 30px;
+text-align: center;
+border-radius: 50%
+}
+}
+.body-title{
+  h2{
+    margin: 8px auto;
+    color: #949494;
+  }
+}
+}
+</style>

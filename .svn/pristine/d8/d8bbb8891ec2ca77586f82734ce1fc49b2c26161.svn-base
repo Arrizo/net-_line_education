@@ -1,0 +1,20 @@
+import {HOME_NAME} from '@/store/mutationTypes'
+
+const state = {
+  isLogin: '111'
+}
+const actions = {
+  doLogin ({commit, state}, params) {
+    commit(HOME_NAME, params)
+  }
+}
+const mutations = {
+  [HOME_NAME] (state, params) {
+    state.isLogin = params
+  }
+}
+export default{
+  state,
+  actions,
+  mutations
+}

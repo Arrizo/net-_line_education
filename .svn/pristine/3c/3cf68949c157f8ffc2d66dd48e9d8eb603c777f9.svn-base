@@ -1,0 +1,6 @@
+import NoDate from '@/components/NoData'
+
+const install = Vue => {
+  Vue.component('NoDate', NoDate)
+}
+export default install

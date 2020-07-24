@@ -1,0 +1,52 @@
+<template>
+  <div class="ad-contanier">
+    <div class="grid-box">
+      <div class="grid-box-item" v-for="item in 10" :key="item">
+        <div class="grid-item-header">dsfa</div>
+        <h1 class="grid-name">name</h1>
+        <i class="grid-delete">x</i>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  name: 'administrators',
+  data () {
+    return {}
+  }
+}
+</script>
+<style lang="scss" scoped>
+.ad-contanier {
+  margin-top: 40px;
+  height: 100%;
+  .grid-box{
+    padding: 20px 10px;
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    .grid-box-item{
+     width: 60px;
+     height: 60px;
+     background: gray;
+     margin-bottom: 10px;
+     position: relative;
+     .grid-delete{
+       position: absolute;
+       display: inline-block;
+       width: 20px;
+       height:20px;
+       border-radius: 50%;
+       font-style: normal;
+       background: gainsboro;
+       text-align: center;
+       line-height: 20px;
+       right: -7px;
+       top: -7px;
+
+     }
+    }
+  }
+}
+</style>

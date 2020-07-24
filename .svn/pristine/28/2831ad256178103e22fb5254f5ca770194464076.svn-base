@@ -1,0 +1,180 @@
+<template>
+  <div class="item-warp">
+    <mt-header fixed title="反假题目测试">
+    <a @click="$router.go(-1)" slot="left"><mt-button icon="back">返回</mt-button></a>
+    <!-- <a slot="right" :class="{'time-color':timeOut<=10}">剩余：{{timeOut}}s</a> -->
+    </mt-header>
+<div class="subject-warp">
+    <div class="subject" v-for="(item,index) in testArray" :key='index' v-if="index===curIndex">
+      <div class="subject-title">
+        {{item.content}} <span class="test-type">（{{ '134'.includes(item.type)?'单选题':'多项选题'}}）</span>
+      </div>
+      <div class="subject-resolve">
+<mt-checklist
+  v-model="answerArray[index]"
+  :options="item.opts"
+   @change="currentValue($event,item.id,item.type)">
+</mt-checklist>
+      </div>
+    </div>
+    </div>
+    <div class="subject-btn">
+      <mt-button type="primary"  :disabled="curIndex===0" @click.stop="preven()">上一题</mt-button>
+      <mt-button type="primary"  :disabled='curIndex===testArray.length-1' @click.stop="next()">下一题</mt-button></div>
+    <mt-tabbar fixed class="tools">
+  <mt-tab-item >
+    {{`${curIndex+1}`}}
+        <svg-icon icon-class="number" slot="icon"></svg-icon>
+  </mt-tab-item>
+  <mt-tab-item  :class="{collec:collectObj[curIndex]}" @click.native.stop="collection()">
+    <svg-icon :icon-class="collectObj[curIndex]?'collect':'uncollect'" slot="icon"></svg-icon>
+      {{collectObj[curIndex]?'取消收藏':'收藏'}}
+  </mt-tab-item>
+  <mt-tab-item :style="{color:answerArray[testArray.length-1]? '#26a2ff !important':''}">
+    <svg-icon icon-class="submit" slot="icon"></svg-icon>
+交卷
+  </mt-tab-item>
+</mt-tabbar>
+  </div>
+</template>
+<script>
+import {randomTest, testResult, collectTest} from '@/api'
+import {getlatter} from '@/utils/common'
+import {mapGetters} from 'vuex'
+export default {
+  name: 'sortItem',
+  data () {
+    return {
+      page: 0,
+      answerObj: {},
+      timeOut: 15,
+      answerArray: [[]],
+      curIndex: 0,
+      collectObj: [],
+      testArray: [],
+      isCollect: {}
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
+  created () {
+    this.getTest()
+  },
+  mounted () {
+    this.countDown()
+    this.isCollect.userNo = this.userInfo.userNo
+  },
+  methods: {
+    preven () {
+      this.curIndex--
+    },
+    getTest () {
+      this.page++
+      this.$route.query.page = this.page
+      this.$route.query.userNo = this.userInfo.userNo
+      randomTest(this.$route.query, this.$route.query.type).then(res => {
+        if (res.code === 200) {
+          res.data.forEach(item => {
+            item.opts.forEach((item, index) => {
+              item.label = getlatter(index) + '、' + item.content
+            })
+          })
+          this.testArray.push(...res.data)
+        }
+      })
+    },
+    next () {
+      if (this.answerArray[this.curIndex].length === 0) {
+        this.$popBox.Toast('请选择答案!')
+        return false
+      }
+      this.curIndex++
+      // 下一步是否组数，没有新建一个
+      !this.answerArray[this.curIndex] && this.answerArray.push([])
+      this.$route.query.type && this.curIndex + 1 === this.testArray.length && this.getTest()
+    },
+    collection () {
+      this.$set(this.collectObj, this.curIndex, !this.collectObj[this.curIndex])
+      this.isCollect.questionId = this.testArray[this.curIndex].id
+      this.isCollect.type = this.collectObj[this.curIndex] ? 1 : 2
+      collectTest(this.isCollect)
+    },
+    countDown () {
+      let st = setInterval(() => {
+        if (this.timeOut <= 0) {
+          clearInterval(st)
+        } else {
+          this.timeOut--
+        }
+      }, 1000)
+    },
+    // 1 3 4 ,2 5
+    currentValue ($event, id, double) {
+      let flag = '134'.includes(double)
+      if (flag && $event.length > 1) {
+        $event.shift()
+      }
+      this.answerObj[id] = $event
+      console.log('answerObj', this.answerObj)
+    },
+    test_result () {
+      testResult().then(res => {
+
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.item-warp{
+  height: 100%;
+  .tools{
+    .is-selected{
+      background: #fff;
+      color: #000;
+    }
+  }
+  .time-color{
+    color: #f15454;
+    font-weight: bold;
+  }
+}
+.subject-warp{
+  margin: 50px 10px 20px;
+  .subject-title{
+    color: #000;
+    font-size: 17px;
+    padding:8px;
+    line-height: 30px;
+  }
+}
+.subject-btn{
+  display: flex;
+  justify-content: space-around;
+}
+.collec{
+  color: #fa8715 !important;
+}
+/deep/.subject-resolve{
+  .mint-checklist{
+    .mint-cell{
+          background-image: none;
+      .mint-cell-wrapper{
+  background-image: none;
+      }
+    }
+  }
+}
+.test-type{
+  color: #26a2ff;
+}
+// .analysis{
+//   padding: 10px;
+//   background: #fa8181;
+//   color: #fff;
+//   font-size: 17px;
+// }
+</style>

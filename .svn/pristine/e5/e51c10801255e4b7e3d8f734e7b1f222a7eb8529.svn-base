@@ -1,0 +1,66 @@
+<template>
+  <div class="layout-wrapper">
+    <!-- 头部模块 -->
+    <mt-header fixed :title=" $route.meta.title || '盛金源培训'" v-show="hasHeader">
+      <a @click="$router.go(-1)" slot="left" v-show="$route.meta.hasBack">
+    <mt-button icon="back"></mt-button>
+  </a>
+  <a slot="right" v-show="$route.meta.hasRight"  @click="$router.push({name:$route.meta.path})">{{$route.meta.rightTitle}}</a>
+    </mt-header>
+    <!-- <sjy-header v-if="hasHeader" ></sjy-header> -->
+    <!-- 中间入口模块 -->
+    <router-view :key="$route.path" :class="[{'view-top':hasHeader,'view-bottom':hasFooter}]" />
+    <!-- 底部模块 -->
+    <sjy-footer v-show="hasFooter" ></sjy-footer>
+    <vueToTop :type="2" color="#26a2ff" top="20" bottom="100" size="45"></vueToTop>
+
+  </div>
+</template>
+<script>
+import SjyFooter from '@/components/SjyFooter'
+import SjyHeader from '@/components/SjyHeader'
+export default {
+  name: 'Layout',
+  props: {
+  },
+  data () {
+    return {}
+  },
+  computed: {
+    hasHeader () {
+      if (typeof (this.$route.meta.hasHeader) === 'undefined') {
+        return true
+      } else {
+        return this.$route.meta.hasHeader
+      }
+    },
+    hasFooter () {
+      if (typeof (this.$route.meta.hasFooter) === 'undefined') {
+        return true
+      } else {
+        return this.$route.meta.hasFooter
+      }
+    }
+  },
+  components: {
+    SjyFooter,
+    SjyHeader
+  },
+  methods: {}
+}
+</script>
+<style lang="scss" scoped>
+.layout-wrapper{
+  // overflow: auto;
+  .view-top{
+   padding-top: 40px;
+  }
+  .view-bottom{
+    padding-bottom: 50px;
+  }
+  .mint-header.is-fixed{
+    z-index: 1000;
+  }
+}
+
+</style>

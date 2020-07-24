@@ -1,0 +1,112 @@
+<template>
+  <div>
+    <mt-header >
+      <!-- :title="userInfo.mobile" -->
+      <a slot="left">
+    <mt-button ><img slot="icon" src="@/assets/images/photo.png" height="85" width="90"></mt-button> </a>
+     <mt-button slot="left" class="login-btn" @click="toLogin()" :disabled='!!userInfo.token'>{{userInfo.mobile||'点击登录'}}</mt-button>
+    <a slot="right">
+    <mt-button ><img slot="icon" src="@/assets/images/VIP.png" height="80" width="95"></mt-button></a>
+    </mt-header>
+    <mt-cell
+      title="个人信息"
+      is-link
+      to='/personinfo'>
+      <span slot="icon" class="person-item">
+    <svg-icon icon-class='course' ></svg-icon>
+    </span>
+    </mt-cell>
+        <mt-cell
+      title="学习计划"
+      is-link
+      to='/plan_list'>
+      <span slot="icon" class="person-item">
+    <svg-icon icon-class='notice' ></svg-icon>
+    </span>
+    </mt-cell>
+        <mt-cell
+      title="学习记录"
+      is-link
+      to='/study'>
+      <span slot="icon" class="person-item">
+    <svg-icon icon-class='record' ></svg-icon>
+    </span>
+    </mt-cell>
+    <mt-cell
+      title="我的订单"
+      is-link>
+     <span slot="icon" class="person-item">
+    <svg-icon icon-class='order' ></svg-icon>
+    </span>
+    </mt-cell>
+
+    <!-- <mt-cell
+      title="我的收藏"
+      is-link>
+      <span slot="icon" class="person-item">
+    <svg-icon icon-class='collect1' ></svg-icon>
+    </span>
+    </mt-cell> -->
+    <mt-cell v-show="userInfo.token"
+      @click.native="logout()"
+      title="退出登录"
+      is-link>
+      <span slot="icon" class="person-item">
+    <svg-icon icon-class='logout' ></svg-icon>
+    </span>
+    </mt-cell>
+  </div>
+</template>
+<script>
+import {mapGetters} from 'vuex'
+import {myMixin} from './minxis'
+export default {
+  name: 'Person',
+  data () {
+    return {level: 1}
+  },
+  mixins: [myMixin],
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
+  methods: {
+    toLogin () {
+      this.$router.push({path: '/login'})
+    },
+    logout () {
+      this.$popBox.MessageBox.confirm('是否退出登录？').then(res => {
+        this.$store.dispatch('logOut')
+        this.$router.replace({path: '/login'})
+      })
+    },
+    buyVip () {
+      this.$router.push({path: '/menber'})
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.mint-cell-wrapper .mint-cell-title {
+   flex: inherit;
+}
+.mint-header {
+  font-size: large;
+    height: 4.066667rem;
+}
+.mint-header .mint-button {
+    height: 90px;
+}
+.person-item{
+  width: 26px;
+  height: 26px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+.login-btn{
+  padding-left: 30px;
+  height: auto !important;
+}
+</style>

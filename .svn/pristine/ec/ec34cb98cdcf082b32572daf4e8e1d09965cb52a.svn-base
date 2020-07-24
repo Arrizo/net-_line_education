@@ -1,0 +1,39 @@
+<template>
+  <div>
+    <mt-cell v-for="(item,index) in 10" :key="index">
+      <div slot="title" class="more-title"><h2>课程名称</h2><h2>VIP:29</h2></div>
+      <img slot="icon" src="@/assets/logo.png" width="80" height="80">
+      <i class="more-icon">优惠</i>
+    </mt-cell>
+  </div>
+</template>
+<script>
+export default {
+  name: 'MoreCoures',
+  data () {
+    return {}
+  },
+  mounted () {
+    // console.log(this.$parent.$refs.header.title = '1212')
+  }
+}
+</script>
+<style lang="scss" scoped>
+.more-title{
+  display: inline-block;
+  vertical-align: middle;
+}
+.more-icon{
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  display: inline-block;
+  width: 50px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 12px;
+  font-style: normal;
+  margin-right: -10px;
+  background: orange;
+}
+</style>

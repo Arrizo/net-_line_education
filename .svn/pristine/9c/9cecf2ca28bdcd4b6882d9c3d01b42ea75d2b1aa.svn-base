@@ -1,0 +1,24 @@
+<template>
+  <mt-header title="我的红包">
+  <router-link to="/Person" slot="left">
+    <mt-button icon="back"></mt-button>
+  </router-link>
+</mt-header>
+
+</template>
+<script>
+export default {
+  name: 'Mypacket',
+  data () {
+    return {}
+  }
+}
+</script>
+<style lang="scss" scoped>
+
+.mint-header {
+   font-size: 0.49rem;
+    height: 2.066667rem;
+}
+
+</style>

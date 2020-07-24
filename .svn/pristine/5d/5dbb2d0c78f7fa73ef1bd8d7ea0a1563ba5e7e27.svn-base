@@ -1,0 +1,13 @@
+
+import fetch from '@/utils/fetch'
+import {API_PATH} from '@/config/env'
+export const userLogin = (objJson) => fetch(API_PATH + '/user/api/user/login/password', objJson, 'POST')
+export const userRegist = (objJson) => fetch(API_PATH + '/user/api/user/register', objJson, 'POST')
+export const sendCode = (objJson) => fetch(API_PATH + '/user/api/user/send/code', objJson, 'POST')
+export const updataPass = (objJson) => fetch(API_PATH + '/user/api/user/update/password', objJson, 'POST')
+export const studylog = (objJson) => fetch(API_PATH + '/course/api/course/user/study/log/list', objJson, 'POST')
+export const studyPlan = (objJson) => fetch(API_PATH + '/course/auth/study/plan/list', objJson, 'POST')
+export const checkUser = (objJson) => fetch(API_PATH + '/user/api/user/queryMobile', objJson, 'POST')
+export const updateMobile = (objJson) => fetch(API_PATH + '/user/api/user/updateMobile', objJson, 'POST')
+export const AccessToken = (objJson) => fetch(API_PATH + '/system/auth/sys/getAccessToken', objJson, 'POST')
+export const getWxAssetToken = (objJson) => fetch('https://api.weixin.qq.com/sns/oauth2/access_token?appid=wx243a884c56dd278e&secret=4e8c0e87026b79162867684a905b42d6&code=' + objJson.code + '&grant_type=authorization_code', {}, 'GET')

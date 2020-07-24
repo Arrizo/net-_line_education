@@ -1,0 +1,49 @@
+<template>
+  <div>
+    <mt-header :title="$route.query.type==='1'?'修改姓名':'性别'">
+  <a slot="left">
+    <mt-button @click="$router.go(-1)">取消</mt-button>
+  </a>
+  <a slot="right" @click="confirm">确定</a>
+</mt-header>
+<mt-field label="姓名" v-model="$route.query.name" v-if="$route.query.type==='1'" placeholder='请输入名字'></mt-field>
+<div v-else-if="$route.query.type==='2'">
+<mt-field label="手机号" v-model="$route.query.mobile" readonly :disableClear='true'></mt-field>
+<mt-field label="旧密码" placeholder="输入旧密码" type="password" v-model="updataPass.oldPass" ></mt-field>
+<mt-field label="新密码" placeholder="输新密码" type="password" v-model="updataPass.newPass" autocomplete='off'></mt-field>
+<mt-field label="确认密码" placeholder="输入确认密码" type="password" v-model="updataPass.confirmPass" autocomplete='off'></mt-field>
+</div>
+    <mt-radio
+    v-else
+  v-model="$route.query.sex"
+  align='right'
+  :options="opts">
+</mt-radio>
+  </div>
+</template>
+<script>
+import {updataUserInfo} from '@/api'
+export default {
+  name: 'Edite',
+  data () {
+    return {
+      opts: [{label: '男', value: '1'}, {label: '女', value: '2'}, {label: '保密', value: '0'}],
+      updataPass: {}
+    }
+  },
+  methods: {
+    confirm () {
+      updataUserInfo(this.$route.query).then(res => {
+        this.$store.dispatch('getPerInfo').then(() => {
+          this.$router.go(-1)
+        })
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+/deep/.mint-radiolist .mint-radiolist-title{
+  display: none;
+}
+</style>

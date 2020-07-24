@@ -1,0 +1,21 @@
+<template>
+  <div>
+    <study-item/>
+  </div>
+</template>
+
+<script>
+import StudyItem from '../StudyRecord/StudyItem'
+export default {
+  name: 'StudyPlan',
+  data () {
+    return {}
+  },
+  components: {
+    StudyItem
+  }
+}
+</script>
+<style lang="scss" scoped>
+
+</style>

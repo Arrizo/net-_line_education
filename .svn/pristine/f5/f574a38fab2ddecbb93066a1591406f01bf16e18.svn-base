@@ -1,0 +1,16 @@
+import router from '../router'
+export const oscript = () => {
+  let oscript = document.createElement('script')
+  oscript.type = 'text/javascript'
+  oscript.src = 'https://player.polyv.net/script/polyvplayer.min.js'
+  document.body.appendChild(oscript)
+}
+export const randomNo = () => {
+  let random = ''
+  for (let i = 0; i < 4; i++) {
+    random += Math.floor(Math.random() * 10)
+  }
+  random = new Date().getTime() + random
+  return random
+}
+export const getlatter = (index) => String.fromCharCode(65 + index)

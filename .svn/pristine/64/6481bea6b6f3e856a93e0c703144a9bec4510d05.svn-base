@@ -1,0 +1,9 @@
+import fetch from '@/utils/fetch'
+import {API_PATH} from '@/config/env'
+export const categoryTree = (objJson) => fetch(API_PATH + '/exam/auth/category/tree', objJson, 'GET')
+export const testResult = (objJson) => fetch(API_PATH + '/exam/auth/test/audit', objJson, 'POST')
+export const collectTest = (objJson) => fetch(API_PATH + '/exam/auth/difficult/mark', objJson, 'POST')
+export const randomTest = (objJson, type) => {
+  let url = type === 1 ? '/exam/auth/difficult/list' : type === 2 ? '' : '/exam/auth/test/randomTest'
+  return fetch(API_PATH + url, objJson, 'POST')
+}

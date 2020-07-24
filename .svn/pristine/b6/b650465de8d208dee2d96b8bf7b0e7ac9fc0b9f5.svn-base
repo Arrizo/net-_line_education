@@ -1,0 +1,46 @@
+<template>
+  <div>
+    children:
+
+<children placeholder='帆帆帆帆' type='password'  pick-data='333333s' v-model="name" @focus="fffff"></children>
+
+  </div>
+</template>
+<script>
+export default {
+  name: 'System',
+  data () {
+    return {
+      name: '111'
+    }
+  },
+  watch: {
+    name () {
+      console.log('updata', name)
+    }
+  },
+  methods: {
+    fffff () {
+      alert(33)
+    }},
+  components: {
+    children: {
+      props: ['value'],
+      inheritAttrs: false,
+      template: `<div><label for="">{{msg}}</label>
+      <input  v-bind="$attrs" :value="value" @input="$emit('input',$event.target.value)" ></div>`,
+      data () {
+        return {
+          msg: '11'
+        }
+      },
+      created () {
+        console.log(this.$listeners)
+      }
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+
+</style>

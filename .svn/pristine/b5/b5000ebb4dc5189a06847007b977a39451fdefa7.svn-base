@@ -1,0 +1,204 @@
+<template>
+  <div class="login-wrap">
+      <div class="vip-introduce">
+        <h1 >超级会员（SVIP）享专属特权</h1>
+        <span>海量课程专享，付费课程免费学习，超低价课程，资源随心下，一切只为助力你的学习与成长。</span>
+        <i class="vip-halo"></i>
+      </div>
+      <div class="vip-details">
+        <div class="vip-year">
+          <div class="vip-img"></div>
+          <div class="vip-content">
+            <h3>年度会员</h3>
+            <label> 有效期为1年（365天）</label>
+             <h3>¥/年</h3>
+          </div>
+        </div>
+<mt-button  size="large" plain @click.native="pay()">立即支付</mt-button>
+      </div>
+      <div class="vip-server">
+        <h1 >会员权益与服务说明 </h1>
+        <span>1、会员在有效期可免费学习会员免费课程。</span>
+        <span>2、会员有效期，年度会员有效期为1年（365天）。</span>
+        <span>1、会员在有效期可免费学习会员免费课程。</span>
+        <span>2、会员有效期，年度会员有效期为1年（365天）。</span>
+        <span>1、会员在有效期可免费学习会员免费课程。</span>
+        <span>2、会员有效期，年度会员有效期为1年（365天）。</span>
+      </div>
+  </div>
+</template>
+<script>
+// wechatPay getWxAssetToken AccessToken randomNo AccessToken
+import {orderPay, wxPayAppResult, getwxPayAppResult} from '@/api'
+import {GetQueryString} from '@/utils/common'
+import storage from '@/utils/Storage_Cookie'
+export default {
+  name: 'Member',
+  data () {
+    return {
+      orderObj: {
+      },
+      payObj: {
+        detail: '超级会员(365天)',
+        appid: 'wx243a884c56dd278e'
+      }
+    }
+  },
+  mounted () {
+    // 保证每次获取的code是唯一性
+    this.payObj.code = GetQueryString()
+    this.payObj.code = this.payObj.code === storage.getStorage('code') ? null : this.payObj.code
+    this.payObj.code && this.pay()
+  },
+  methods: {
+    pay () {
+      console.log(this.payObj, '=-=-=-=')
+      if (this.payObj.code) {
+        storage.setStorage('code', this.payObj.code)
+        this.addOrderPay()
+        console.log(this.payObj, '=-=-=-=')
+      } else {
+        let url = location.origin + location.pathname + '#/menber'
+        window.location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${this.payObj.appid}&redirect_uri=${encodeURIComponent(url)}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+      }
+    },
+    addOrderPay () {
+      this.$popBox.Indicator.open()
+      orderPay(this.payObj).then(res => {
+        if (res.code === 200) {
+          this.$popBox.Indicator.close()
+          console.log('订单。。。。', res.data)
+          this.orderObj = res.data
+          this.onBridgeReady(res.data)
+        }
+      }).catch(() => {
+        this.payObj.code = ''
+        this.$popBox.MessageBox('支付失败，稍后再试')
+        this.$popBox.Indicator.close()
+      })
+    },
+    onBridgeReady (data) {
+      let seft = this
+      data.paySign = data.sign
+      console.log(data, '=-=-=')
+      // eslint-disable-next-line no-undef
+      WeixinJSBridge.invoke(
+        'getBrandWCPayRequest', data,
+        function (res) {
+          console.log('wx-info', res)
+          if (res.err_msg === 'get_brand_wcpay_request:ok') {
+            wxPayAppResult(seft.orderObj).then(res => {
+              if (res.code === 200 && res.data === '未付款') {
+                getwxPayAppResult(seft.orderObj).then(res => {
+                  seft.$router.push({path: '/'})
+                })
+              } else { seft.$router.push({path: '/'}) }
+            })
+          } else {
+            console.log('res.msg' + res.err_msg)
+            seft.payObj.code = ''
+            alert(res.err_msg)
+          }
+        })
+    }
+    // payHandle (data) {
+    //   if (typeof WeixinJSBridge === 'undefined') {
+    //     if (document.addEventListener) {
+    //       document.addEventListener('WeixinJSBridgeReady', this.onBridgeReady, false)
+    //     } else if (document.attachEvent) {
+    //       document.attachEvent('WeixinJSBridgeReady', this.onBridgeReady)
+    //       document.attachEvent('onWeixinJSBridgeReady', this.onBridgeReady)
+    //     }
+    //   } else {
+    //     this.onBridgeReady(data)
+    //   }
+    // }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.login-wrap{
+  height: 100%;
+  background: #f5f5f5;
+  .vip-introduce{
+    padding-top: 70px;
+    height: 170px;
+    background: #110c01;
+    color:rgb(203, 159, 109);
+    h1{
+      font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    margin: 8px 0px 25px;
+    }
+    span{
+          padding: 0px 55px;
+    display: inline-block;
+    }
+    .vip-halo{
+          position: absolute;
+    left: 154px;
+    top: 34px;
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      background-image: radial-gradient(circle,#5d3512, 30%,transparent 70%);;
+    }
+  }
+  .vip-details{
+      margin: 0px 10px;
+      background: #fff;
+      border-radius: 5px;
+      margin-top:-40px;
+      padding: 0px 8px 10px;
+    .vip-year{
+       display: flex;
+       justify-content: start;
+       padding: 8px;
+       border-bottom: 1px solid gainsboro;
+    .vip-img{
+      min-width: 150px;
+      min-height: 80px;
+       background: #a7813a;
+
+    }
+    .vip-content{
+        padding-left: 8px;
+        h3{
+          color: #4f4f4f;
+          margin: 5px 0px;
+          &:last-child{
+            color:rgb(203, 159, 109);
+          }
+        }
+        span{
+          color: #838383;
+        }
+    }
+    }
+  }
+}
+/deep/.mint-button--large{
+  border-color: rgb(203, 159, 109);;
+  margin-top: 10px;
+.mint-button-text{
+  font-size: 15px;
+  color:rgb(203, 159, 109);;
+}
+}
+.vip-server{
+  margin: 12px 10px;
+h1{
+  margin: 10px 0px;
+  color: #000;
+  font-weight: bold;
+  font-size: 17px;
+}
+span{
+  margin: 10px 0px;
+      display: block;
+    color: #969696;
+}
+}
+
+</style>

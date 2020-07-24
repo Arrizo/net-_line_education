@@ -1,0 +1,25 @@
+<template>
+  <mt-header title="我的课程">
+  <router-link to="/Person" slot="left">
+    <mt-button icon="back"></mt-button>
+  </router-link>
+</mt-header>
+
+</template>
+<script>
+export default {
+  name: 'Mylesson',
+  data () {
+    return {}
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+
+.mint-header {
+   font-size: 0.49rem;
+    height: 2.066667rem;
+}
+
+</style>

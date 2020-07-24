@@ -1,0 +1,85 @@
+<template>
+  <div class="hit-det">
+    <div class="hit-bg">
+      <div class="result">
+          <h1>{{detailsObj.score}}分</h1>
+          <h4>本次测试成绩</h4>
+      </div>
+      <div class="hit-percent">
+         <div>
+          <h1>{{detailsObj.errorCount}}道</h1>
+          <h4>错误题数</h4>
+         </div>
+         <div>
+          <h1>{{detailsObj.rightCount}}道</h1>
+          <h4>正确题数</h4>
+         </div>
+         <div>
+          <h1>{{detailsObj.examTime}}min</h1>
+          <h4>考试用时</h4>
+         </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import {historyDetail} from '@/api'
+export default {
+  name: 'historyDetail',
+  data () {
+    return {
+      detailsObj: {}
+    }
+  },
+  created () {
+    this.getDetails()
+  },
+  methods: {
+    getDetails () {
+      historyDetail({id: this.$route.query.id}).then(res => {
+        if (res.data) {
+          this.detailsObj = res.data
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+.hit-det{
+  height: calc(100vh - 40px);
+  padding-top: 40px;
+  padding: 70px 20px;
+box-sizing: border-box;
+  .hit-bg{
+    width: 100%;
+    height: 100%;
+      background-image: linear-gradient(-45deg, #1897bb, #89bfe4);
+      border-radius: 20px;
+      padding: 100px 0px;
+      box-sizing: border-box;
+      .result{
+        color: #fff;
+        text-align: center;
+        margin-bottom: 50px;
+        h1{
+            font-family: serif;
+            font-size: 42px
+        }
+      }
+      .hit-percent{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        div{
+          flex: 1;
+          text-align: center;
+          color: #fff;
+          h1{
+            font-size: 22px;
+          }
+        }
+      }
+  }
+}
+</style>

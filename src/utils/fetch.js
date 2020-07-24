@@ -1,0 +1,108 @@
+import axios from 'axios'
+import router from '@/router'
+import qs from 'qs'
+import store from '@/store'
+import { Toast, MessageBox } from 'mint-ui'
+// import {GetQueryString} from '@/utils/common' Indicator
+// import {orderPay, AccessToken} from '@/api'
+// http request 拦截器
+let ORDER_REXG = /\/exam\/auth\/self\/asses\/test\/start/
+let isHasPay = false
+axios.interceptors.request.use(
+  config => {
+    isHasPay = ORDER_REXG.test(config.url)
+    const token = store.getters.userInfo.token
+    token && (config.headers.token = token)
+    config.method === 'POST' && (config.data = qs.stringify(config.data))
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
+const toLogin = () => {
+  router.replace({
+    path: '/login',
+    query: {
+      redirect: router.currentRoute.fullPath
+    }
+  })
+}
+
+const errorHandle = (status, other) => {
+  // 状态码判断
+  switch (status) {
+    // 401: 未登录状态，跳转登录页
+    case 401:
+      toLogin()
+      break
+      // 403 token过期
+      // 清除token并跳转登录页
+    case 302:
+      Toast('登录过期，请重新登录')
+      store.dispatch('logOut')
+      setTimeout(() => {
+        toLogin()
+      }, 1000)
+      break
+      // 404请求不存在
+    case 404:
+      Toast('请求的资源不存在')
+      break
+    default:
+      console.log(other)
+  }
+}
+
+// http response 拦截器
+axios.interceptors.response.use(
+  response => {
+    if (response.status === 200) {
+      if (response.data.code === 510) {
+        !isHasPay && MessageBox.alert('您还未缴费，请前往支付！').then(action => {
+          router.replace({
+            path: '/menber'
+          })
+        })
+      } else {
+        return Promise.resolve(response)
+      }
+    } else {
+      return Promise.reject(response)
+    }
+  }
+  , error => {
+    const {response} = error
+    if (response) {
+      errorHandle(response.status, response.data.message)
+      return Promise.reject(response.data)
+    } else {
+      Toast('请求异常，稍后再试！')
+    }
+  }
+)
+
+export default function fetch (url, params = {}, method) {
+  let requestConfig = {
+    method: method || 'GET',
+    url: url
+  }
+  params.v = new Date().getTime()
+  params.userNo = store.getters.userInfo.userNo || ''
+  if (requestConfig.method === 'GET') {
+    requestConfig.params = params
+  } else {
+    requestConfig.data = params
+  }
+  return new Promise((resolve, reject) => {
+    axios(requestConfig).then(
+      response => {
+        resolve(response.data)
+      }, err => {
+        reject(err)
+      }
+    ).catch(error => {
+      reject(error)
+    })
+  })
+}

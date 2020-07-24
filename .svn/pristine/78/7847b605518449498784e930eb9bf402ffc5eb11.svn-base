@@ -1,0 +1,153 @@
+<template>
+<div>
+  <div class="home-swiper">
+    <mt-swipe :auto="4000">
+  <mt-swipe-item v-for="(item,index) in advList" :key="index">
+    <img :src="item.advImg" :title="item.advTitle" @click="$router.push({path:'/details',query:{advUrl:item.advUrl}})">
+  </mt-swipe-item>
+</mt-swipe>
+  </div>
+  <div class="tools-panel">
+    <div class="tools-container">
+      <!-- <div class="tools-item" @click.stop="toTest('Sort',2)"> -->
+        <div class="tools-item" @click.stop="$router.push({name:'Sort', query:{type:2}})">
+        <div class="tools-1"><svg-icon icon-class='test'/></div>
+        <i>随机练习</i>
+      </div>
+      <div class="tools-item" @click.stop="$router.push({name:'Sort_Item', query:{type:4}})">
+        <div class="tools-5"><svg-icon icon-class='test'/></div>
+        <i>难题练习</i>
+      </div>
+      <div class="tools-item" @click.stop="$router.push({path:'Sort_Item',query:{type:3}})">
+        <div class="tools-6"><svg-icon icon-class='test'/></div>
+        <i>错题练习</i>
+      </div>
+      <!-- <div class="tools-item" @click.stop=" toTest('Sort',1)"> -->
+      <div class="tools-item" @click.stop="$router.push({name:'Sort', query:{type:1}})">
+      <div class="tools-2"><svg-icon icon-class='test'/></div>
+      <i>模拟测试</i>
+      </div>
+      <!-- $router.push({name:'Examination',query:{type:1}}) -->
+          <div class="tools-item " @click.stop="$popBox.Toast('尽情期待！')">
+        <div class="tools-7"><svg-icon icon-class='test'/></div>
+         <i>实操考试</i>
+      </div>
+            <div class="tools-item"  @click.stop="toTest()">
+        <div class="tools-8"><svg-icon icon-class='test'/></div>
+         <i>自评测试</i>
+      </div>
+      <div class="tools-item " @click.stop="$router.push({name:'Sort_history',query:{type:1}})">
+        <div class="tools-3"><svg-icon icon-class='record1'/></div>
+         <i>模拟记录</i>
+      </div>
+      <div class="tools-item " @click.stop="$router.push({name:'Sort_history',query:{type:2}})">
+        <div class="tools-4"><svg-icon icon-class='alarm'/></div>
+         <i>练习记录</i>
+      </div>
+    </div>
+    <!-- <div class="tools-item"></div> -->
+  </div>
+  </div>
+</template>
+<script>
+import {homeAdvertiseList} from '@/api'
+import {mapGetters} from 'vuex'
+export default {
+  name: 'Ware',
+  data () {
+    return {
+      advList: [],
+      advBO: {
+        platShow: 0
+      }
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'plantInfo'
+    ])
+  },
+  mounted () {
+    this.getBannerList()
+  },
+  methods: {
+    toTest () {
+      let nowTime = Date.now()
+      let startTime = new Date(this.plantInfo.startTime).getTime()
+      let endTime = new Date(this.plantInfo.endTime).getTime()
+      if (nowTime < startTime || nowTime > endTime) {
+        this.$popBox.Toast('未到考试时间或学习计划未完成！')
+        return false
+      }
+      this.$router.push({name: 'Sort_Item', query: {type: 5}})
+    },
+    // 广告列
+    getBannerList () {
+      homeAdvertiseList(this.advBO).then(res => {
+        if (res.data.advList.length > 0) {
+          this.advList.push(...res.data.advList)
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+  .home-swiper{
+    height: 190px;
+    img{
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .tools-panel{
+    border-bottom: 10px solid ghostwhite;
+    border-top: 10px solid ghostwhite;
+  }
+  .tools-container{
+    display: flex;
+    flex-wrap: wrap;
+    .tools-item{
+      width: 25%;
+      display: inline-block;
+      text-align: center;
+      margin: 18px 0px;
+        div{
+          box-sizing: border-box;
+          height: 60px;
+          width: 60px;
+          padding: 12px;
+          border-radius: 50%;
+          margin: 0 auto 10px;
+        }
+        i{
+          font-style: normal;
+          font-style: 14px;
+        }
+        .tools-1{
+          background-image:linear-gradient(-45deg, #1577b9, #abcde4);
+        }
+        .tools-2{
+          background-image:linear-gradient(-45deg, #ef3b4d, #f5c9da);
+        }
+        .tools-3{
+          background-image:linear-gradient(-45deg,#19b915, #e5f8e8);
+        }
+        .tools-4{
+          background-image:linear-gradient(-45deg, #c4901e, #f5ecc1);
+        }
+        .tools-5{
+          background-image:linear-gradient(-45deg, #15b98b, #abcde4);
+        }
+        .tools-6{
+          background-image:linear-gradient(-45deg, #bcd917, #fbf8ac);
+        }
+        .tools-7{
+       background-image: linear-gradient(-45deg, #175cd9, #fff7fc);
+        }
+        .tools-8{
+       background-image: linear-gradient(-45deg, #bae58c, #a0c99f);
+        }
+    }
+  }
+</style>

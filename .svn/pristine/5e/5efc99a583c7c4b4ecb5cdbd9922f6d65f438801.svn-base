@@ -1,0 +1,117 @@
+<template>
+  <div>
+    <div v-for="(item, index) in studyObj" :key="index" class="tab-style"  @click="$router.push({name:'CoursDetails',params:{params: item}})" v-if="type===1&&item.periodNu!==item.playOverNu">
+<mt-cell is-link><span slot="title" class="studying " :style="{background:'#8ac72d'}">学习进行中</span></mt-cell>
+<mt-cell  class='study-item'>
+  <span slot="title" class="mint-cell-text">{{item.courseName}}</span>
+  <div slot="icon" class="study-item-box">
+    <span>已学{{percent(item)}}%</span>
+      <img :src="item.courseLogo">
+  </div>
+</mt-cell>
+    </div>
+    <div v-for="(item, index) in studyObj" :key="index" class="tab-style"  @click="$router.push({name:'CoursDetails',params:{params: item}})" v-else-if="type===1&&item.periodNu===item.playOverNu">
+<mt-cell is-link><span slot="title" class="studying " :style="{background:'gray'}">已学完成</span></mt-cell>
+<mt-cell  class='study-item'>
+  <span slot="title" class="mint-cell-text">{{item.courseName}}</span>
+  <div slot="icon" class="study-item-box">
+    <span>已学100%</span>
+      <img :src="item.courseLogo">
+  </div>
+</mt-cell>
+    </div>
+  </div>
+</template>
+<script>
+import {mapGetters} from 'vuex'
+import {studylog} from '@/api'
+export default {
+  name: 'item',
+  props: {
+    type: {
+      type: Number,
+      default: 1
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'userInfo'
+    ])
+  },
+  data () {
+    return {
+      studyObj: []
+    }
+  },
+  created () {
+    this.getStudyLog()
+  },
+  methods: {
+    getStudyLog () {
+      let userObj = {userNo: 2018112015051635}
+      studylog(userObj).then(res => {
+        if (res.code === 200 && res.data.list.length > 0) {
+          this.studyObj = res.data.list
+        }
+      })
+    },
+    percent (item) {
+      // item.periodNu!==item.playOverNu
+      if (item.periodNu > 0) {
+        return ((item.playOverNu / item.periodNu) * 100).toFixed()
+      } else {
+        return 0
+      }
+    }
+  }
+
+}
+</script>
+<style lang="scss" scoped>
+.studying{
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #fff;
+}
+.sy1{
+    background: #8ac72d;
+}
+.sy2{
+    background: gray;
+}
+.study-item{
+  .mint-cell-title{
+    .mint-cell-text{
+    display: inline-block;
+    margin: 18px 0px 20px;
+    vertical-align: top;
+    }
+  }
+  .study-item-box{
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    overflow: hidden;
+    display: inline-block;
+    span{
+        position: absolute;
+        right: 0px;
+        bottom: 0px;
+        background: rgba(0, 0, 0, .7);
+        color: #fff;
+        padding: 5px;
+        font-size: 12px;
+        border-radius: 5px;
+    }
+    img{
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+.tab-style{
+  border-bottom: 8px solid #f2f2f2;
+}
+</style>

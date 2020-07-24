@@ -1,0 +1,16 @@
+const Warehouse = resolve => require(['@/containers/Warehouse'], resolve)
+const routes = [{
+  path: '/ware',
+  name: 'Ware',
+  component: Warehouse,
+  meta: {
+    // hasBack: true,
+    // title: '测试类型选择',
+    // hasRight: true,
+    // rightTitle: '练习记录',
+    // path: 'Sort_history'
+    // hasHeader: false
+  }
+}]
+
+export default routes

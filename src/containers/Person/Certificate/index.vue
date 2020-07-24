@@ -1,0 +1,88 @@
+<template>
+        <div class="certifi-mask" v-if="qrCodeUrl">
+          <div class="certifi-bg">
+            <h1>2020年反假货币知识培训</h1>
+            <h1>结业证书</h1>
+            <div class="certifi-content">
+            <span>{{examObj.nikeName}}</span>学员于<span>{{examObj.examTime[0]}}</span>年<span>{{examObj.examTime[2]}}</span>月<span>{{examObj.examTime[4]}}</span>日参加反假货币知识培训，经自评测试，成绩合格，顺利结业，特发此证。
+            </div>
+            <div class="certifi-code">
+              <vue-qr :text="qrCodeUrl" :size='200' :margin='5'/>
+              <div>深圳盛金源科技股份有限公司</div>
+              <div>{{examObj.examTime[0]}}年{{examObj.examTime[2]}}月{{examObj.examTime[4]}}日</div>
+            </div>
+          </div>
+        </div>
+</template>
+<script>
+import {getCertificate} from '@/api'
+import vueQr from 'vue-qr'
+export default {
+  name: 'Certificate',
+  data () {
+    return {
+      examObj: {},
+      qrCodeUrl: ''
+    }
+  },
+  components: {
+    vueQr
+  },
+  mounted () {
+    getCertificate().then(res => {
+      if (res.code === 200) {
+        this.examObj.nikeName = res.data.list[6]
+        this.examObj.examTime = res.data.examTime.split(/(-|\s+)/g)
+        res.data.list.pop()
+        this.qrCodeUrl = location.origin + '/#/certificate_details?list=' + JSON.stringify(res.data.list)
+      }
+    }).catch(() => {
+      this.$popBox.MessageBox.alert('暂查询不到您的结业证书').then(action => {
+        this.$router.go(-1)
+      })
+    })
+  }
+}
+</script>
+<style lang="scss" scoped>
+.certifi-mask{
+  height: 100vh;
+  width: 100%;
+  .certifi-bg{
+    height: 100%;
+    width: 100%;
+    background: url('../../../assets/images/certificate.jpg') no-repeat;
+    background-size: 100% 100%;
+    h1{
+      font-weight: bold;
+      text-align: center;
+      font-size: 20px;
+      &:first-child{
+        padding: 100px 0px 10px;
+      }
+      &:last-child{
+          font-size: 30px;
+      }
+    }
+    .certifi-content{
+      font-weight: 600;
+      font-size: 16px;
+      padding: 24px 34px 24px 52px;
+      line-height: 30px;
+      span{
+font-weight: 900;
+text-decoration: underline;
+      }
+    }
+    .certifi-code{
+      text-align: center;
+div{
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+margin-top: 8px;
+}
+    }
+  }
+}
+</style>
