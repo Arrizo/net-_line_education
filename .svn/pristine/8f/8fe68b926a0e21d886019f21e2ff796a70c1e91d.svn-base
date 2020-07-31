@@ -16,7 +16,7 @@
 <div v-else-if="$route.query.type==='4'" class="edite-header-icon">
   <img :src="hedaerIcon||imgs" alt="">
   <section class="select-img">
-  <input class="select-comon" type='file' accept='image/*'  @change="chooseImage" ref="image"/>
+  <input class="select-comon" type='file'  @change="chooseImage"/>
    <mt-button size='large' type="primary" class="select-comon">从相册选一张</mt-button>
   </section>
 
@@ -55,15 +55,8 @@ export default {
     },
     // 上传图片
     chooseImage (e) {
-      let files = e.target.files[0] || e.dataTransfer.files[0]
-      let size = (files.size / 1024) > 20
-      let regrex = files.type.includes('jpeg')
-      if (size || !regrex) {
-        this.$popBox.Toast('上传图片的格式只能是 jpg 格式，大小不超过20kb')
-        this.$refs.image.value = ''
-        return false
-      }
       this.$popBox.Indicator.open()
+      let files = e.target.files[0] || e.dataTransfer.files[0]
       let formdata = new FormData()
       formdata.append('picFile', files)
       choosePicture(formdata).then(res => {
@@ -72,9 +65,7 @@ export default {
           this.hedaerIcon = res.data
         }
         this.$popBox.Indicator.close()
-        this.$refs.image.value = ''
       })
-
       // let reader = window.FileReader ? new FileReader() : false
       // if (reader) {
       //   reader.readAsDataURL(files)

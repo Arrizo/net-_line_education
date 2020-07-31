@@ -10,7 +10,7 @@
     <!-- <sjy-header v-if="hasHeader" ></sjy-header> -->
     <!-- 中间入口模块 -->
     <keep-alive include="KeepExam">
-           <!-- <transition name="slide-left"> -->
+           <!-- <transition name="fade"> -->
     <router-view :key="$route.path" :class="[{'view-top':hasHeader,'view-bottom':hasFooter}]" />
             <!-- </transition> -->
     </keep-alive>
@@ -109,5 +109,11 @@ export default {
     .slide-bottom-enter {
         opacity: 0;
         transform: translate(0, -100%);
+    }
+    .fade-enter-active, .fade-leave-active{
+    transition: opacity .3s
+    }
+    .fade-enter,.fade-leave-active{
+      opacity: 0;
     }
 </style>
