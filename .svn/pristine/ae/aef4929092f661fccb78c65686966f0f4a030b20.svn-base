@@ -1,0 +1,38 @@
+<template>
+  <div>
+    <mt-cell  is-link v-for="(item,index) in rootObj.examSessionList" :key="index" :title="item.title" :value='item.beginTime' :to="{path:'/examination',query:{type:rootObj.type ,examSessionId:item.id,practicalId:rootObj.id,examType:rootObj.examType,envelopeNum:params[0]}}"></mt-cell>
+  </div>
+</template>
+<script>
+import {getExamInfo} from '@/api'
+export default {
+  name: 'Roolist',
+  data () {
+    return {
+      rootObj: {},
+      params: []
+    }
+  },
+  created () {
+    try {
+      this.params = JSON.parse(this.$route.query.params)
+    } catch (error) {
+      // 1249635329411432450 1298157703450402817
+      this.params = ['A1', '1249635329411432450']
+    }
+    this.initData()
+  },
+  methods: {
+    initData () {
+      getExamInfo({id: this.params[1]}).then(res => {
+        if (res.code === 200) {
+          this.rootObj = res.data
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+
+</style>

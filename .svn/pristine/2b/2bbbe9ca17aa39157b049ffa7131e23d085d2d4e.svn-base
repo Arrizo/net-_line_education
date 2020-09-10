@@ -1,0 +1,318 @@
+<template>
+<div class="exam-warp">
+    <a class="time-out">时间：{{useTime}}</a>
+  <div class="exam" v-if="isAwait">
+    <div >
+      <loading :loading-show='loading'></loading>
+    </div>
+     <div class="start-btn"><div class="start" @click="start">{{loadingText}}</div></div>
+    </div>
+    <div class="exam-field" v-else>
+      <div class="exam-item">
+<mt-field label="考生姓名:" v-model="personInfo.name" readonly></mt-field>
+<mt-field label="身份证号:" v-model="username"></mt-field>
+<mt-field label="单   位:" v-model="username"></mt-field>
+<mt-field label="信封编号:" v-model="$route.query.envelopeNumber" readonly></mt-field>
+<mt-field label="纸币张数" placeholder="请输入纸币张数" type='number' v-model.number="answersObj.falseCoinTotal" @input="getCounter($event)"></mt-field>
+  </div>
+  <div v-for="(item,index) in answersObj.falseCoinTotal" :key="index" class="exam-item">
+      <h1 class="money-title" @click="toggles(index)" >假币特征（其中1张）<i class="close" :class="{'open':curIndex===index}"></i></h1>
+      <div  class="show" :class="{'show-item':curIndex===index}">
+      <mt-field label="假币冠字号码:" placeholder="请输入冠字号码" :data='index' type='number' v-model="answersObj.answers[index].crownNumber" class="show-firt"></mt-field>
+      <mt-radio class="radiolist split no-title"
+      @change="checkeds($event,index)"
+  v-model="answersObj.answers[index].featureType"
+  :options="[{label:'伪造币',value:'1'},{label:'变造币',value:'2'}]">
+</mt-radio >
+<div v-show="answersObj.answers[index].featureType==='1'" class="fake">
+<section v-for="(option,oIndex) in optionItem" :key="oIndex+'key'" >
+  <div v-if="option.type===1" class="clearfix">
+          <mt-radio
+          :title="option.feature+'：'"
+  v-model="value"
+  :options="option.opt.split('；')">
+</mt-radio>
+  </div>
+</section>
+</div>
+<div v-show="answersObj.answers[index].featureType==='2'" class="fake">
+  <section v-for="(option,oIndex) in optionItem" :key="oIndex+'key'" >
+  <div v-if="option.type===2" class="clearfix">
+          <mt-radio
+          :title="option.feature+'：'"
+  v-model="value"
+  :options="option.opt.split('；')">
+</mt-radio>
+  </div>
+</section>
+</div>
+</div>
+  </div>
+  <div class="comfirm-btn">
+  <mt-button type="primary" class="primary" size='large' @click="submit">交 卷</mt-button>
+  </div>
+    </div>
+    <exam-details :ShowDetails.sync='showMask'></exam-details>
+    </div>
+</template>
+<script>
+import SockJs from 'sockjs-client'
+import Stomp from 'stompjs'
+import {timeOut} from '@/utils/common'
+import {getRoomInfo, listFeature} from '@/api'
+import {mapGetters} from 'vuex'
+// let API = require('../../../../config/proxy')
+export default {
+  name: 'Examination',
+  data () {
+    return {
+      value: '',
+      featureObj: { size: 10, current: 1 },
+      showMask: false,
+      hidden: true,
+      useTime: '',
+      testTime: 5,
+      username: '',
+      curIndex: '',
+      isAwait: false,
+      loading: false,
+      loadingText: '开始',
+      optionItem: {
+        counterMoy: []
+      },
+      answersObj: {
+
+      }
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'personInfo'
+    ])
+  },
+  created () {
+    // this.initRoom()
+    // this.outTest()
+    // this.initWebsocket()
+    this.getListFeature()
+    this.countDown()
+  },
+  beforeDestroy () {
+    (this.disc = true) && this.stompClien && this.stompClien.disconnect()
+    clearInterval(this.st)
+  },
+  methods: {
+    submit () {
+      this.showMask = true
+    },
+    toggles (index) {
+      this.curIndex = index === this.curIndex ? '' : index
+    },
+    initWebsocket () {
+      let sock = new SockJs('http://192.168.4.111:8001//socket/auth')
+      this.stompClien = Stomp.over(sock)
+      this.stompClien.heartbeat.outgoing = 5000
+      this.stompClien.heartbeat.incoming = 5000
+      console.log('=-=-=', sock, this.stompClien)
+      this.stompClien.connect({token: '23232323'}, (data) => {
+      // 连接成功是返回的数据
+        console.log('-=-=-=成功====！', data)
+        // 房间的持续数据连接
+        this.stompClien.subscribe('/queue/auth.practice.exam.9999', (res) => {
+          // 订阅某个topic
+          console.log(res)
+        })
+        // 初始话房间信息
+        // this.stompClien.subscribe('/auth/practice/exam/9999', (res) => {
+        //   // 订阅某个topic
+        //   console.log(res)
+        // })
+      }, (error) => {
+        (!this.disc) && setTimeout(() => {
+          this.initWebsocket()
+        }, 2000)
+
+        console.log('connect falt...', error)
+      })
+    },
+    // 初始化房间信息
+    initRoom () {
+      getRoomInfo({roomId: this.$route.query.id || '1285112991059587074'}).then(res => {
+        console.log('res...', res)
+      })
+    },
+    // 获取答题卡题目
+    getListFeature () {
+      this.featureObj.examType = this.$route.query.examType
+      listFeature(this.featureObj).then(res => {
+        if (res.code === 200) {
+          this.optionItem = res.data.records
+        }
+      })
+    },
+    getCounter ($event) {
+      (!$event) && ($event = 0)
+      this.answersObj.falseCoinTotal = parseInt($event)
+      this.answersObj.answers = []
+      for (let i = 0; i < parseInt($event); i++) {
+        this.answersObj.answers[i] = {}
+      }
+    },
+    start () {
+      let seft = this
+      this.loading = !this.loading
+      this.loadingText = this.loading ? '取消开始' : '开始'
+      this.stompClien.send('api/send', {}, JSON.stringify({ready: seft.loading}))
+    },
+    countDown () {
+      this.st = setInterval(() => {
+        if (this.testTime === 0) { clearInterval(this.st); return false }
+        this.testTime--
+        this.useTime = timeOut(this.testTime)
+      }, 1000)
+    },
+    checkeds ($event, index) {
+      this.$set(this.answersObj.answers[index], 'featureType', $event)
+      console.log($event)
+    },
+    outTest () {
+      this.$popBox.MessageBox.alert('您不符合此场考试的权限，即将退出！').then(action => {
+        this.$router.go(-1)
+      })
+    }
+
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+
+.exam-warp{
+  height: 100%;
+  .exam-field{
+    .exam-item{
+      border-bottom: 6px solid #ebebeb;
+    }
+  }
+}
+.exam{
+  margin-top: 100px;
+        display:flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        .start-btn{
+            margin-top: 200px
+        }
+}
+        .start{
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            text-align: center;
+            display: table-cell;
+            font-size: 17px;
+            color: #fff;
+            vertical-align: middle;
+            background-image: linear-gradient(-30deg,lightgreen,lightblue)
+        }
+      /deep/.all-money .mint-cell-wrapper .mint-cell-title{
+        width: 100%
+      }
+      /deep/.all-num .mint-cell-wrapper .mint-cell-title{
+        width: auto;
+      }
+      .money-title{
+            font-size: 18px;
+    text-align: center;
+    margin: 8px 0px;
+      }
+      .show{
+        transition: all .3s;
+        max-height: 0px;
+        overflow:hidden;
+            width: 100%;
+            .show-firt{
+              border-bottom: 5px solid #eee;
+            }
+      }
+      .show-item{
+        max-height: 1000px
+      }
+      .close{
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-right: 1px solid gray;
+        border-bottom: 1px solid gray;
+        transform: rotate(-45deg);
+        margin-left:168px;
+        transition: all .3s;
+      }
+      .open{
+        transform: rotate(45deg)
+      }
+ .time-out{
+  position: fixed;
+  top: 10px;
+  right: 5px;
+  color: #fff;
+  font-size: 13px;
+  z-index: 1001;
+}
+/deep/ .radiolist{
+  display: flex;
+justify-content: center;
+align-items: center;
+ .mint-cell{
+  .mint-cell-wrapper{
+    background-image: none;
+  }
+}
+}
+/deep/ .fake {
+  .mint-radiolist {
+  .mint-radiolist-title{
+    color: #26a2ff;
+    font-size: 14px;
+  }
+  .mint-cell{
+        float: left;
+    .mint-cell-wrapper{
+    background-image: none;
+    }
+  }
+  }
+}
+.split{
+  border-bottom: 1px solid #d9d9d9;
+}
+/deep/ .no-title{
+  .mint-radiolist-title{
+    // display: none;
+  }
+}
+/deep/ .no-line{
+    .mint-cell{
+    .mint-cell-wrapper{
+    background-image: none;
+    }
+  }
+}
+/deep/ .radil-title{
+  justify-content: start;
+  .mint-radiolist-title{
+      color: #26a2ff;
+      font-size: 15px;
+  }
+}
+.comfirm-btn{
+ margin-top: 10px;
+ padding: 0px 40px;
+}
+.clearfix{
+  border-bottom: 1px solid #eee;
+}
+
+</style>

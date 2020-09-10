@@ -1,0 +1,169 @@
+<template>
+  <div>
+    <div class="header">说明：非常满意10分，很不满意0分；请客观公正地在评估项目后面写上您的评分。</div>
+<div>
+  <div class="title"><span>培训内容</span></div>
+  <div class="asset-box">
+<div class="asset-table-header"><h3>评估项目</h3><h3>评分</h3></div>
+<div class="asset-table-header no-border" v-for="(item,index) in assetObj.instructors" :key="index">
+   <template v-if="item.type===1">
+  <h3 >{{item.criteria}}</h3>
+  <h3><input class="asset-scro" v-model="item.score" @input="fomatData($event,item,index)" maxlength='2'/></h3>
+   </template>
+</div>
+</div>
+</div>
+<div>
+  <div class="title"><span>培训讲师</span></div>
+  <div class="asset-box">
+<div class="asset-table-header"><h3>评估项目</h3><h3>评分</h3></div>
+<div class="asset-table-header no-border" v-for="(item,index) in assetObj.instructors" :key="index">
+ <template v-if="item.type===2">
+  <h3 >{{item.criteria}}</h3>
+  <h3><input class="asset-scro" v-model="item.score" @input="fomatData($event,item,index)"  maxlength='2'/></h3>
+ </template>
+</div>
+</div>
+<div class="other">
+  <mt-field  placeholder="评估结论/建议：" type="textarea" rows="4" v-model="assetObj.advice"></mt-field>
+</div>
+<section>
+  <div @click="submit" :class="{success:isSuccess}">{{ isSuccess ? '✔ 提交成功':'提 交'  }}</div>
+</section>
+</div>
+  </div>
+</template>
+<script>
+import {grading, subAssetment} from '@/api'
+export default {
+  name: '',
+  data () {
+    return {
+      assetObj: {instructors: []},
+      isSuccess: false,
+      scoreList: []
+    }
+  },
+  created () {
+    this.initData()
+  },
+  methods: {
+    // 提交。。
+    submit () {
+      if (this.assetObj.instructors.length !== this.scoreList.length) {
+        this.$popBox.Toast({message: '请完善评分项目', duration: 2000})
+        return false
+      }
+      this.assetObj.score = this.assetObj.instructors.reduce((t, n) => parseInt(t) + parseInt(n.score), 0)
+      subAssetment(this.assetObj).then(res => {
+        if (res.code === 200) {
+          this.$popBox.Toast({message: '提交成功！即将跳转到首页...', duration: 2000})
+          this.isSuccess = true
+          setTimeout(() => {
+            this.$router.replace({path: '/home'})
+          }, 2000)
+        } else {
+          this.$popBox.Toast({message: res.msg, duration: 4000})
+        }
+      })
+    },
+    fomatData (e, i, num) {
+      console.log('=-==', this.assetObj)
+      //       i.score = (i.score).replace(/[^(0-9|10)]$/ig, '')
+      i.score = (i.score).replace(/[^\d]$/ig, '')
+      if (i.score && parseInt(i.score) > 10) i.score = [...i.score][1]
+      this.scoreList[num] = i.score
+      if (!this.scoreList[num]) this.scoreList.splice(num, 1)
+    },
+    initData () {
+      this.assetObj.offlineUserId = this.$route.query.id
+      grading().then(res => {
+        if (res.code === 200) {
+          this.assetObj.instructors = res.data.list
+        }
+      })
+    }
+  }
+
+}
+</script>
+<style lang="scss" scoped>
+.header{
+padding: 14px;
+    font-size: 13px;
+    color: gray;
+}
+.border{
+  border-bottom: 1px solid #eeee;
+}
+.title{
+  padding: 0px 10px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 16px;
+  font-family: fantasy;
+  background: #efefef;;
+  span{
+    border-bottom: 2px solid #2c3e50;
+   padding-bottom: 10px;
+  }
+}
+.asset-box{
+  .asset-table-header{
+    display: flex;
+
+    h3{
+    font-size: 15px;
+    font-weight: bold;
+     text-align: center;
+      padding: 6px 0px;
+      border-bottom: 1px solid gray;
+      &:first-child{
+        border-right: 1px solid gray;
+        flex: auto;
+        font-size: 13px;
+      }
+      &:last-child{
+    width: 70px;
+    min-width: 70px;
+      }
+    }
+  }
+
+  }
+  .no-border{
+    h3{
+      font-weight: normal !important;
+text-align: left !important;
+      input{
+        height: 100%;
+        outline: none;
+        border: 0px;
+      width: 100%;
+      text-align: center;
+      }
+      &:first-child{
+        padding-left: 6px;
+      }
+    }
+  }
+  .other{
+    border-top: 10px solid #f6f6f6e5;
+  }
+  section{
+  display: flex;
+  justify-content: center;
+  div{
+  margin: 20px 0px;
+background: #26a2ff;
+text-align: center;
+padding: 8px 44px;
+color: #fff;
+border-radius: 20px;
+font-size: 15px;
+  }
+}
+.success{
+  background: #44b549;
+}
+</style>
