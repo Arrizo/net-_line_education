@@ -1,4 +1,4 @@
-{
+﻿{
     "gitlens.advanced.messages": {
         "suppressCommitHasNoPreviousCommitWarning": false,
         "suppressCommitNotFoundWarning": false,
@@ -66,3 +66,4 @@
         "source.fixAll.eslint": true
     },
 }
+。。。。。。
