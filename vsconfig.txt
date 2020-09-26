@@ -60,10 +60,11 @@
     "cSpell.language": "en",
     "prettier.singleQuote": true,
     "prettier.semi": false,
-    "editor.fontSize": 14,
+    "editor.fontSize": 15,
     "explorer.confirmDelete": false,
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
 }
-。。。。。。0000
+
+>>>>>>> master
